@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+curl -Lqs https://registry.npmjs.org/pnpm | jq -r '.versions | keys | join(" ")'

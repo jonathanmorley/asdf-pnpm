@@ -1,0 +1,23 @@
+name: ASDF CI
+
+on: [push, pull_request]
+
+jobs:
+  test-plugin:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [12, 14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      # Configures the node version used on GitHub-hosted runners
+      - uses: actions/setup-node@v1
+        with:
+          # The Node.js version to configure
+          node-version: ${{ matrix.node }}
+      - name: asdf_plugin_test
+        uses: asdf-vm/actions/plugin-test@v1.0.0
+        with:
+          command: "pnpm --version"
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }} # automatically provided
