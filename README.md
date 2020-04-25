@@ -1,6 +1,6 @@
 # asdf-pnpm
 
-![Build Status](https://github.com/jonathanmorley/asdf-pnpm/workflows/ASDF%20CI/badge.svg)
+[![Build Status](https://github.com/jonathanmorley/asdf-pnpm/workflows/ASDF%20CI/badge.svg)](https://github.com/jonathanmorley/asdf-pnpm/actions)
 
 [pnpm][2] plugin for the [asdf][1] version manager.
 
@@ -12,7 +12,7 @@ If one of the commands needed is unavailable, it will let you know.
 ## Installing
 
 ```
-asdf plugin-add pnpm
+asdf plugin-add pnpm git@github.com:jonathanmorley/asdf-pnpm.git
 ```
 
 [1]: https://asdf-vm.com/
