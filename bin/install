@@ -5,48 +5,50 @@ set -Eeuo pipefail
 # Based on https://github.com/twuni/asdf-yarn/blob/master/bin/install
 
 asdf_pnpm_fail() {
-  >&2 echo "⛔ $*"
+  echo >&2 "⛔ $*"
   exit 1
 }
 
 asdf_pnpm_download() {
-    local TARBALL_URL="$(curl -Lqs "https://registry.npmjs.org/pnpm/${ASDF_INSTALL_VERSION}" | jq -r .dist.tarball)"
-    curl -sSL -o "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz" "${TARBALL_URL}"
+  local tarball_url
+  tarball_url="$(curl -Lqs "https://registry.npmjs.org/pnpm/${ASDF_INSTALL_VERSION}" | jq -r .dist.tarball)"
+  curl -sSL -o "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz" "${tarball_url}"
 }
 
 asdf_pnpm_install() {
-    local ASDF_PNPM_DIR="$(mktemp -d -t asdf-pnpm-XXXXXXX)"
-    
-    (
-        #cd "${ASDF_PNPM_DIR}"
-        
-        asdf_pnpm_download
-        
-        # Extract archive
-        tar xzf "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz" --strip-components=1 --no-same-owner
-        
-        # Remove downloaded files
-        rm -f "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz"
-        
-        ln bin/pnpm.js bin/pnpm
-        ln bin/pnpx.js bin/pnpx
-    )
-    
-    if [ -d "${ASDF_INSTALL_PATH}" ]; then
-        # Remove existing install directory
-        rm -fR "${ASDF_INSTALL_PATH}"
-    fi
-    
-    # Create parent directory, if necessary
-    mkdir -p "$(dirname "${ASDF_INSTALL_PATH}")"
-    
-    # Finish the installation
-    #mv "${ASDF_PNPM_DIR}" "${ASDF_INSTALL_PATH}"
+  local asdf_pnpm_dir
+  asdf_pnpm_dir="$(mktemp -d -t asdf-pnpm-XXXXXXX)"
+
+  (
+    cd "${asdf_pnpm_dir}"
+
+    asdf_pnpm_download
+
+    # Extract archive
+    tar xzf "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz" --strip-components=1 --no-same-owner
+
+    # Remove downloaded files
+    rm -f "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz"
+
+    ln -f bin/pnpm.js bin/pnpm
+    ln -f bin/pnpx.js bin/pnpx
+  )
+
+  if [ -d "${ASDF_INSTALL_PATH}" ]; then
+    # Remove existing install directory
+    rm -fR "${ASDF_INSTALL_PATH}"
+  fi
+
+  # Create parent directory, if necessary
+  mkdir -p "$(dirname "${ASDF_INSTALL_PATH}")"
+
+  # Finish the installation
+  mv "${asdf_pnpm_dir}" "${ASDF_INSTALL_PATH}"
 }
 
-[ "${ASDF_INSTALL_TYPE}" == 'ref' ] && asdf_pnpm_fail "This plugin does not support installing by ref."
-[ -z "${ASDF_INSTALL_VERSION}" ] && asdf_pnpm_fail "Unspecified install version."
-[ -z "${ASDF_INSTALL_PATH}" ] && asdf_pnpm_fail "No installation directory was provided. Are you running this command via asdf? Try running 'asdf install yarn <version>'"
-[ -x "$(which curl)" ] || asdf_pnpm_fail "Missing one of either of the following dependencies: curl"
+[[ "${ASDF_INSTALL_TYPE}" == 'ref' ]] && asdf_pnpm_fail "This plugin does not support installing by ref."
+[[ -z "${ASDF_INSTALL_VERSION}" ]] && asdf_pnpm_fail "Unspecified install version."
+[[ -z "${ASDF_INSTALL_PATH}" ]] && asdf_pnpm_fail "No installation directory was provided. Are you running this command via asdf? Try running 'asdf install pnpm <version>'"
+[[ -x "$(which curl)" ]] || asdf_pnpm_fail "Missing one of either of the following dependencies: curl"
 
-asdf_pnpm_install $*
+asdf_pnpm_install "$@"
