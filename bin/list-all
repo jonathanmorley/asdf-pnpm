@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-curl -Lqs https://registry.npmjs.org/pnpm \
-    | jq -r '.versions | keys[]' \
-    | sort --version-sort \
-    | xargs
+curl -Lqs https://registry.npmjs.org/pnpm |
+  jq -r '.versions | keys[]' |
+  sort --version-sort |
+  xargs
