@@ -18,7 +18,7 @@ asdf_pnpm_install() {
     local ASDF_PNPM_DIR="$(mktemp -d -t asdf-pnpm-XXXXXXX)"
     
     (
-        #cd "${ASDF_PNPM_DIR}"
+        cd "${ASDF_PNPM_DIR}"
         
         asdf_pnpm_download
         
@@ -28,8 +28,8 @@ asdf_pnpm_install() {
         # Remove downloaded files
         rm -f "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz"
         
-        ln bin/pnpm.js bin/pnpm
-        ln bin/pnpx.js bin/pnpx
+        ln -f bin/pnpm.js bin/pnpm
+        ln -f bin/pnpx.js bin/pnpx
     )
     
     if [ -d "${ASDF_INSTALL_PATH}" ]; then
@@ -41,7 +41,7 @@ asdf_pnpm_install() {
     mkdir -p "$(dirname "${ASDF_INSTALL_PATH}")"
     
     # Finish the installation
-    #mv "${ASDF_PNPM_DIR}" "${ASDF_INSTALL_PATH}"
+    mv "${ASDF_PNPM_DIR}" "${ASDF_INSTALL_PATH}"
 }
 
 [ "${ASDF_INSTALL_TYPE}" == 'ref' ] && asdf_pnpm_fail "This plugin does not support installing by ref."
