@@ -11,7 +11,7 @@ asdf_pnpm_fail() {
 
 asdf_pnpm_download() {
   local tarball_url
-  tarball_url="$(curl -Lqs "https://registry.npmjs.org/pnpm/${ASDF_INSTALL_VERSION}" | jq -r .dist.tarball)"
+  tarball_url="$(curl -Lqs "https://registry.npmjs.org/pnpm/${ASDF_INSTALL_VERSION}" | grep -Eo '"tarball":".+?"' | cut -d\" -f4)"
   curl -sSL -o "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz" "${tarball_url}"
 }
 
