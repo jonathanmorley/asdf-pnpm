@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 curl -Lqs https://registry.npmjs.org/pnpm |
-  grep -Eo '"version":".+?"' |
+  grep -Eo '"version":"[^"]+"' |
   cut -d\" -f4 |
   sort --version-sort |
   xargs
