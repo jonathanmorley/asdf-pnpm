@@ -8,7 +8,22 @@
 
 This plugin should work on Linux and Mac operating systems.
 
-[JQ][3] is also required to be available
+### Utilities
+
+The following utilities are required:
+
+- `bash`
+- `curl`
+- `grep`
+- `cut`
+- `sort`
+- `xargs`
+- `mktemp`
+- `tar`
+- `rm`
+- `ln`
+- `mkdir`
+- `mv`
 
 ## Installing
 
