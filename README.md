@@ -6,8 +6,9 @@
 
 ## Requirements
 
-This plugin should work out of the box on Linux and Mac operating systems.
-If one of the commands needed is unavailable, it will let you know.
+This plugin should work on Linux and Mac operating systems.
+
+[JQ][3] is also required to be available
 
 ## Installing
 
@@ -17,3 +18,4 @@ asdf plugin-add pnpm git@github.com:jonathanmorley/asdf-pnpm.git
 
 [1]: https://asdf-vm.com/
 [2]: https://pnpm.js.org/
+[3]: https://stedolan.github.io/jq/
