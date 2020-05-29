@@ -30,6 +30,9 @@ asdf_pnpm_install() {
     # Remove downloaded files
     rm -f "pnpm-v${ASDF_INSTALL_VERSION}.tar.gz"
 
+    ls
+    ls bin
+
     ln -f bin/pnpm.js bin/pnpm
     ln -f bin/pnpx.js bin/pnpx
   )
