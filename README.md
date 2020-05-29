@@ -8,7 +8,18 @@
 
 This plugin should work on Linux and Mac operating systems.
 
-[JQ][3] is also required to be available
+### Utilities
+
+The following utilities are required:
+
+- `bash`
+- `curl`
+- `grep`
+- `cut`
+- `sort`
+- `xargs`
+- `tar`
+- `mv`
 
 ## Installing
 
@@ -18,4 +29,3 @@ asdf plugin-add pnpm git@github.com:jonathanmorley/asdf-pnpm.git
 
 [1]: https://asdf-vm.com/
 [2]: https://pnpm.js.org/
-[3]: https://stedolan.github.io/jq/
