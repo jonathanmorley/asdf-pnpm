@@ -17,6 +17,6 @@ fi
     tar xzf - --strip-components=1 --no-same-owner
 
   for bin in bin/*; do
-    mv "${bin}" "bin/$(basename "${bin}" ".js")"
+    ln "${bin}" "bin/$(basename "${bin}" ".js")"
   done
 )
