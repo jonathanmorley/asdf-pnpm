@@ -19,7 +19,7 @@ The following utilities are required:
 - `sort`
 - `xargs`
 - `tar`
-- `mv`
+- `ln`
 
 ## Installing
 
