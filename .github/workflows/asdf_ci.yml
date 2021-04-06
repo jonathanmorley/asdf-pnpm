@@ -29,6 +29,7 @@ jobs:
           - '12'
           - '14'
         exclude:
+          # From https://pnpm.io/installation#compatibility
           # pnpm >= v6 does not support node 10
           - node: '10'
             version: 'latest'
@@ -58,7 +59,7 @@ jobs:
       - name: Test plugin
         uses: asdf-vm/actions/plugin-test@v1
         with:
-          command: pnpm --version
+          command: pnpm --version && pnpx --version
           version: ${{ matrix.version }}
   lint:
     runs-on: ubuntu-latest
