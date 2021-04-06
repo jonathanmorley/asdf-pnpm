@@ -16,11 +16,20 @@ echo "Downloading pnpm v${ASDF_INSTALL_VERSION}"
 curl --silent --fail --show-error --location "${TARBALL_URL}" |
   tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
 
-# binaries
+# executables
 for bin in pnpm pnpx; do
-  if [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.js" ]]; then
-    ln -sf "${bin}.js" "${ASDF_INSTALL_PATH}/bin/${bin}"
-  elif [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.cjs" ]]; then
+  # v6 executables are .cjs in bin/
+  if [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.cjs" ]]; then
     ln -sf "${bin}.cjs" "${ASDF_INSTALL_PATH}/bin/${bin}"
+  # v2 executables are .js in bin/
+  elif [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.js" ]]; then
+    # v2 executables are not executable
+    chmod +x "${ASDF_INSTALL_PATH}/bin/${bin}.js"
+    ln -sf "${bin}.js" "${ASDF_INSTALL_PATH}/bin/${bin}"
+  # v1 executables are in lib/bin/
+  elif [[ -f "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" ]]; then
+    chmod +x "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js"
+    mkdir -p "${ASDF_INSTALL_PATH}/bin"
+    ln -sf "../lib/bin/${bin}.js" "${ASDF_INSTALL_PATH}/bin/${bin}"
   fi
 done
