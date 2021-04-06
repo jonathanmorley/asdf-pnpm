@@ -16,20 +16,26 @@ echo "Downloading pnpm v${ASDF_INSTALL_VERSION}"
 curl --silent --fail --show-error --location "${TARBALL_URL}" |
   tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
 
-# executables
-for bin in pnpm pnpx; do
-  # v6 executables are .cjs in bin/
-  if [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.cjs" ]]; then
-    ln -sf "${bin}.cjs" "${ASDF_INSTALL_PATH}/bin/${bin}"
-  # v2 executables are .js in bin/
-  elif [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.js" ]]; then
-    # v2 executables are not executable
-    chmod +x "${ASDF_INSTALL_PATH}/bin/${bin}.js"
-    ln -sf "${bin}.js" "${ASDF_INSTALL_PATH}/bin/${bin}"
-  # v1 executables are in lib/bin/
-  elif [[ -f "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" ]]; then
-    chmod +x "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js"
-    mkdir -p "${ASDF_INSTALL_PATH}/bin"
-    ln -sf "../lib/bin/${bin}.js" "${ASDF_INSTALL_PATH}/bin/${bin}"
-  fi
+# v1 doesn't have a bin/dir (its binaries are in lib/bin)
+mkdir -p "${ASDF_INSTALL_PATH}/bin"
+
+BINARIES=('pnpm' 'pnpx')
+for bin in "${BINARIES[@]}"; do
+  BINARY_PATHS=(
+    "${ASDF_INSTALL_PATH}/bin/${bin}.cjs"    #v6
+    "${ASDF_INSTALL_PATH}/bin/${bin}.js"     #v2 - v5
+    "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" #v1
+  )
+
+  for BINARY_PATH in "${BINARY_PATHS[@]}"; do
+    if [[ -f "${BINARY_PATH}" ]]; then
+      BIN_PATH="${BINARY_PATH}"
+      break
+    fi
+  done
+
+  # v1 to v2 binaries are not executable
+  chmod +x "${BIN_PATH}"
+
+  ln -sf "${BIN_PATH}" "${ASDF_INSTALL_PATH}/bin/${bin}"
 done
