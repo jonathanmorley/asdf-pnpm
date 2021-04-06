@@ -55,13 +55,11 @@ jobs:
         with:
           # The Node.js version to configure
           node-version: ${{ matrix.node }}
-      - name: asdf_plugin_test
-        uses: asdf-vm/actions/plugin-test@v1.0.0
+      - name: Test plugin
+        uses: asdf-vm/actions/plugin-test@v1
         with:
           command: pnpm --version
           version: ${{ matrix.version }}
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }} # automatically provided
   lint:
     runs-on: ubuntu-latest
     steps:
