@@ -7,16 +7,20 @@ if [[ "${ASDF_INSTALL_TYPE:-version}" == 'ref' ]]; then
   exit 1
 fi
 
-(
-  cd "${ASDF_INSTALL_PATH}"
+TARBALL_URL="https://registry.npmjs.org/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
 
-  curl -Lqs "https://registry.npmjs.org/pnpm/${ASDF_INSTALL_VERSION}" |
-    grep -Eo '"tarball":"[^"]+"' |
-    cut -d\" -f4 |
-    xargs curl -Lqs |
-    tar xzf - --strip-components=1 --no-same-owner
+mkdir -p "${ASDF_INSTALL_PATH}"
 
-  for bin in bin/*; do
-    ln "${bin}" "bin/$(basename "${bin}" ".js")"
-  done
-)
+echo "Downloading pnpm v${ASDF_INSTALL_VERSION}"
+
+curl --silent --fail --show-error --location "${TARBALL_URL}" |
+  tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
+
+# binaries
+for bin in pnpm pnpx; do
+  if [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.js" ]]; then
+    ln -sf "${bin}.js" "${ASDF_INSTALL_PATH}/bin/${bin}"
+  elif [[ -f "${ASDF_INSTALL_PATH}/bin/${bin}.cjs" ]]; then
+    ln -sf "${bin}.cjs" "${ASDF_INSTALL_PATH}/bin/${bin}"
+  fi
+done
