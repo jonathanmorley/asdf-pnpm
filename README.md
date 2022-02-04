@@ -24,7 +24,7 @@ The following utilities are required:
 ## Installing
 
 ```
-asdf plugin-add pnpm git@github.com:jonathanmorley/asdf-pnpm.git
+asdf plugin-add pnpm
 ```
 
 [1]: https://asdf-vm.com/
