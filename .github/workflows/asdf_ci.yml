@@ -11,9 +11,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-16.04  # ubuntu-earliest
           - ubuntu-latest
-          - macos-10.15  # macos-earliest
           - macos-latest
         version:  # all major versions
           - 'latest:0'
@@ -23,11 +21,13 @@ jobs:
           - 'latest:4'
           - 'latest:5'
           - 'latest:6'
-          - 'latest'
+          - 'latest' # 7
         node:  # major versions
           - '10'
           - '12'
           - '14'
+          - '16'
+          - '18'
         exclude:
           # From https://pnpm.io/installation#compatibility
           # pnpm >= v6 does not support node 10
