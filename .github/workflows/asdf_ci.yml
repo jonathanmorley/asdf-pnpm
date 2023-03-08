@@ -34,9 +34,10 @@ jobs:
             version: 7
           - node: 10
             version: 6
+    name: plugin-test (pnpm v${{ matrix.version }}, Node.js v${{ matrix.node }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Setup NodeJS
+      - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
