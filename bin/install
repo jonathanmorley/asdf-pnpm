@@ -11,8 +11,7 @@ TARBALL_URL="https://registry.npmjs.org/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
 
 mkdir -p "${ASDF_INSTALL_PATH}"
 
-echo "Downloading pnpm v${ASDF_INSTALL_VERSION}"
-
+echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${TARBALL_URL}"
 curl --silent --fail --show-error --location "${TARBALL_URL}" |
   tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
 
