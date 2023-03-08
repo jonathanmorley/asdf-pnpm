@@ -15,16 +15,16 @@ jobs:
           - macos-latest
         # Compatibility matrix from https://pnpm.io/installation#compatibility
         version:
-          - 'latest:4'
-          - 'latest:5'
-          - 'latest:6'
-          - 'latest:7' # 7
+          - 4
+          - 5
+          - 6
+          - 7
         node:
-          - '10'
-          - '12'
-          - '14'
-          - '16'
-          - '18'
+          - 10
+          - 12
+          - 14
+          - 16
+          - 18
         exclude:
           # pnpm >= v7 does not support node 12
           - node: '12'
@@ -36,15 +36,20 @@ jobs:
             version: 'latest:6'
     runs-on: ${{ matrix.os }}
     steps:
-      # Configures the node version used on GitHub-hosted runners
-      - uses: actions/setup-node@v1
+      - name: Setup NodeJS
+        uses: actions/setup-node@v1
         with:
-          # The Node.js version to configure
           node-version: ${{ matrix.node }}
-      - name: Test plugin
+      - name: Test pnpm
         uses: asdf-vm/actions/plugin-test@v1
         with:
-          command: pnpm --version && pnpx --version
+          command: pnpm --version
+          version: ${{ matrix.version }}
+      - name: Test pnpx
+        if: matrix.version < 7
+        uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: pnpx --version
           version: ${{ matrix.version }}
   lint:
     runs-on: ubuntu-latest
