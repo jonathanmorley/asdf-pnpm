@@ -27,13 +27,13 @@ jobs:
           - 18
         exclude:
           # pnpm >= v7 does not support node 12
-          - node: '12'
-            version: 'latest:7'
+          - node: 12
+            version: 7
           # pnpm >= v6 does not support node 10
-          - node: '10'
-            version: 'latest:7'
-          - node: '10'
-            version: 'latest:6'
+          - node: 10
+            version: 7
+          - node: 10
+            version: 6
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup NodeJS
@@ -44,13 +44,13 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v1
         with:
           command: pnpm --version
-          version: ${{ matrix.version }}
+          version: latest:${{ matrix.version }}
       - name: Test pnpx
         if: matrix.version < 7
         uses: asdf-vm/actions/plugin-test@v1
         with:
           command: pnpx --version
-          version: ${{ matrix.version }}
+          version: latest:${{ matrix.version }}
   lint:
     runs-on: ubuntu-latest
     steps:
