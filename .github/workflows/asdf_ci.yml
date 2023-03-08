@@ -11,56 +11,47 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-16.04  # ubuntu-earliest
           - ubuntu-latest
-          - macos-10.15  # macos-earliest
           - macos-latest
-        version:  # all major versions
-          - 'latest:0'
-          - 'latest:1'
-          - 'latest:2'
-          - 'latest:3'
-          - 'latest:4'
-          - 'latest:5'
-          - 'latest:6'
-          - 'latest'
-        node:  # major versions
-          - '10'
-          - '12'
-          - '14'
+        # Compatibility matrix from https://pnpm.io/installation#compatibility
+        version:
+          - 4
+          - 5
+          - 6
+          - 7
+        node:
+          - 10
+          - 12
+          - 14
+          - 16
+          - 18
         exclude:
-          # From https://pnpm.io/installation#compatibility
+          # pnpm >= v7 does not support node 12
+          - node: 12
+            version: 7
           # pnpm >= v6 does not support node 10
-          - node: '10'
-            version: 'latest'
-          - node: '10'
-            version: 'latest:6'
-          # pnpm <= v2 does not support node 12
-          - node: '12'
-            version: 'latest:0'
-          - node: '12'
-            version: 'latest:1'
-          - node: '12'
-            version: 'latest:2'
-          # pnpm <= v2 does not support node 14
-          - node: '14'
-            version: 'latest:0'
-          - node: '14'
-            version: 'latest:1'
-          - node: '14'
-            version: 'latest:2'
+          - node: 10
+            version: 7
+          - node: 10
+            version: 6
+    name: plugin-test (pnpm v${{ matrix.version }}, Node.js v${{ matrix.node }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
-      # Configures the node version used on GitHub-hosted runners
-      - uses: actions/setup-node@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
         with:
-          # The Node.js version to configure
           node-version: ${{ matrix.node }}
-      - name: Test plugin
+      - name: Test pnpm
         uses: asdf-vm/actions/plugin-test@v1
         with:
-          command: pnpm --version && pnpx --version
-          version: ${{ matrix.version }}
+          command: pnpm --version
+          version: latest:${{ matrix.version }}
+      - name: Test pnpx
+        if: matrix.version < 7
+        uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: pnpx --version
+          version: latest:${{ matrix.version }}
   lint:
     runs-on: ubuntu-latest
     steps:
