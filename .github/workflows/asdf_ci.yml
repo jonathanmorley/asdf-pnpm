@@ -13,42 +13,27 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-        version:  # all major versions
-          - 'latest:0'
-          - 'latest:1'
-          - 'latest:2'
-          - 'latest:3'
+        # Compatibility matrix from https://pnpm.io/installation#compatibility
+        version:
           - 'latest:4'
           - 'latest:5'
           - 'latest:6'
-          - 'latest' # 7
-        node:  # major versions
+          - 'latest:7' # 7
+        node:
           - '10'
           - '12'
           - '14'
           - '16'
           - '18'
         exclude:
-          # From https://pnpm.io/installation#compatibility
+          # pnpm >= v7 does not support node 12
+          - node: '12'
+            version: 'latest:7'
           # pnpm >= v6 does not support node 10
           - node: '10'
-            version: 'latest'
+            version: 'latest:7'
           - node: '10'
             version: 'latest:6'
-          # pnpm <= v2 does not support node 12
-          - node: '12'
-            version: 'latest:0'
-          - node: '12'
-            version: 'latest:1'
-          - node: '12'
-            version: 'latest:2'
-          # pnpm <= v2 does not support node 14
-          - node: '14'
-            version: 'latest:0'
-          - node: '14'
-            version: 'latest:1'
-          - node: '14'
-            version: 'latest:2'
     runs-on: ${{ matrix.os }}
     steps:
       # Configures the node version used on GitHub-hosted runners
