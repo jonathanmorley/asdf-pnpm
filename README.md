@@ -28,4 +28,4 @@ asdf plugin-add pnpm
 ```
 
 [1]: https://asdf-vm.com/
-[2]: https://pnpm.js.org/
+[2]: https://pnpm.io/
