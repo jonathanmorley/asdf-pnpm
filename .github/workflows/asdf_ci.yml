@@ -46,17 +46,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
       - name: Test pnpm
-        uses: asdf-vm/actions/plugin-test@v1
+        uses: asdf-vm/actions/plugin-test@v2
         with:
           command: pnpm --version
           version: latest:${{ matrix.version }}
       - name: Test pnpx
         if: matrix.version < 7
-        uses: asdf-vm/actions/plugin-test@v1
+        uses: asdf-vm/actions/plugin-test@v2
         with:
           command: pnpx --version
           version: latest:${{ matrix.version }}
@@ -64,14 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run ShellCheck
         run: shellcheck bin/*
   format:
     runs-on: macos-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install shfmt
         run: brew install shfmt
       - name: Run shfmt
