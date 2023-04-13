@@ -19,6 +19,7 @@ jobs:
           - 5
           - 6
           - 7
+          - 8
         node:
           - 10
           - 12
@@ -26,12 +27,19 @@ jobs:
           - 16
           - 18
         exclude:
+          # pnpm >= v8 does not support node 14
+          - node: 14
+            version: 8
+          - node: 12
+            version: 8
+          - node: 10
+            version: 8
           # pnpm >= v7 does not support node 12
           - node: 12
             version: 7
-          # pnpm >= v6 does not support node 10
           - node: 10
             version: 7
+          # pnpm >= v6 does not support node 10
           - node: 10
             version: 6
     name: plugin-test (pnpm v${{ matrix.version }}, Node.js v${{ matrix.node }}, ${{ matrix.os }})
