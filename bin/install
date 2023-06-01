@@ -20,21 +20,22 @@ mkdir -p "${ASDF_INSTALL_PATH}/bin"
 
 BINARIES=('pnpm' 'pnpx')
 for bin in "${BINARIES[@]}"; do
+  # relative to ${ASDF_INSTALL_PATH}/bin
   BINARY_PATHS=(
-    "${ASDF_INSTALL_PATH}/bin/${bin}.cjs"    #v6
-    "${ASDF_INSTALL_PATH}/bin/${bin}.js"     #v2 - v5
-    "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" #v1
+    "${bin}.cjs"           #v6
+    "${bin}.js"            #v2 - v5
+    "../lib/bin/${bin}.js" #v1
   )
 
   for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-    if [[ -f "${BINARY_PATH}" ]]; then
+    if [[ -f "${ASDF_INSTALL_PATH}/bin/${BINARY_PATH}" ]]; then
       BIN_PATH="${BINARY_PATH}"
       break
     fi
   done
 
   # v1 to v2 binaries are not executable
-  chmod +x "${BIN_PATH}"
+  chmod +x "${ASDF_INSTALL_PATH}/bin/${BIN_PATH}"
 
   ln -sf "${BIN_PATH}" "${ASDF_INSTALL_PATH}/bin/${bin}"
 done
