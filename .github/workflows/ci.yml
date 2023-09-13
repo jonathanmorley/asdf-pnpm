@@ -1,4 +1,4 @@
-name: pnpm-asdf CI
+name: asdf-pnpm CI
 
 on:
   push:

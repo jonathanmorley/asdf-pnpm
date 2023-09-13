@@ -1,6 +1,6 @@
 # asdf-pnpm
 
-[![Build Status](https://github.com/jonathanmorley/asdf-pnpm/workflows/ASDF%20CI/badge.svg)](https://github.com/jonathanmorley/asdf-pnpm/actions)
+[![Build Status](https://github.com/jonathanmorley/asdf-pnpm/workflows/asdf-pnpm%20CI/badge.svg)](https://github.com/jonathanmorley/asdf-pnpm/actions)
 
 [pnpm][2] plugin for the [asdf][1] version manager.
 
