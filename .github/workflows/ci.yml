@@ -20,6 +20,7 @@ jobs:
           - 6
           - 7
           - 8
+          - 9
         node:
           - 10
           - 12
@@ -28,6 +29,15 @@ jobs:
           - 18
           - 20
         exclude:
+          # pnpm >= v9 does not support node <= v16
+          - node: 10
+            version: 9
+          - node: 12
+            version: 9
+          - node: 14
+            version: 9
+          - node: 16
+            version: 9
           # pnpm >= v8 does not support node <= v14
           - node: 10
             version: 8
@@ -47,17 +57,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Test pnpm
-        uses: asdf-vm/actions/plugin-test@v2
+        uses: asdf-vm/actions/plugin-test@v3
         with:
           command: pnpm --version
           version: latest:${{ matrix.version }}
       - name: Test pnpx
         if: matrix.version < 7
-        uses: asdf-vm/actions/plugin-test@v2
+        uses: asdf-vm/actions/plugin-test@v3
         with:
           command: pnpx --version
           version: latest:${{ matrix.version }}
@@ -65,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run ShellCheck
         run: shellcheck bin/*
   shfmt:
@@ -75,7 +85,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: reviewdog/action-shfmt@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
