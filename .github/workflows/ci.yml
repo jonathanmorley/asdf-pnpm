@@ -56,10 +56,21 @@ jobs:
     name: plugin-test (pnpm v${{ matrix.version }}, Node.js v${{ matrix.node }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/github-script@v7
+        id: calculate_architecture
+        with:
+          result-encoding: string
+          script: |
+            if ('${{ matrix.os }}' === 'macos-latest' && ['10', '12', '14'].includes('${{ matrix.node }}')) {
+              return "x64"
+            } else {
+              return ''
+            }
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+          architecture: ${{ steps.calculate_architecture.outputs.result }}
       - name: Test pnpm
         uses: asdf-vm/actions/plugin-test@v3
         with:
