@@ -7,7 +7,12 @@ if [[ "${ASDF_INSTALL_TYPE:-version}" == 'ref' ]]; then
   exit 1
 fi
 
-TARBALL_URL="https://registry.npmjs.org/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+REGISTRY="${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}"
+if command -v npm 1> /dev/null; then
+  REGISTRY=$(npm config get registry)
+fi
+
+TARBALL_URL="${REGISTRY%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
 
 mkdir -p "${ASDF_INSTALL_PATH}"
 

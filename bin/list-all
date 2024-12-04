@@ -8,14 +8,18 @@ function sort_versions() {
     awk '{print $2}'
 }
 
+REGISTRY="${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}"
+if command -v npm 1> /dev/null; then
+  REGISTRY=$(npm config get registry)
+fi
+
 curl \
   --silent \
   --fail \
   --show-error \
   --location \
   --header 'Accept: application/vnd.npm.install-v1+json' \
-  https://registry.npmjs.org/pnpm |
-  grep -Eo '"version":"[^"]+"' |
+  "${REGISTRY%/}/pnpm" |
+  grep -Eo '"version":\s?"[^"]+"\s?' |
   cut -d\" -f4 |
-  sort_versions |
-  xargs
+  sort_versions
