@@ -21,6 +21,7 @@ jobs:
           - 7
           - 8
           - 9
+          - 10
         node:
           - 10
           - 12
@@ -28,7 +29,17 @@ jobs:
           - 16
           - 18
           - 20
+          - 22
         exclude:
+          # pnpm >= v10 does not support node <= v16
+          - node: 10
+            version: 10
+          - node: 12
+            version: 10
+          - node: 14
+            version: 10
+          - node: 16
+            version: 10
           # pnpm >= v9 does not support node <= v16
           - node: 10
             version: 9
