@@ -24,6 +24,12 @@ The following utilities are required:
 ## Installing
 
 ```
+asdf plugin add pnpm
+```
+
+or for asdf <0.16.0:
+
+```
 asdf plugin-add pnpm
 ```
 
