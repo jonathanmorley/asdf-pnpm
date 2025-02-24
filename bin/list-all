@@ -18,4 +18,4 @@ curl \
   grep -Eo '"version":"[^"]+"' |
   cut -d\" -f4 |
   sort_versions |
-  xargs
+  tr ' ' '\n'
