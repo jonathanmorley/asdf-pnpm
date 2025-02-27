@@ -8,7 +8,7 @@ if [[ "${ASDF_INSTALL_TYPE:-version}" == 'ref' ]]; then
 fi
 
 REGISTRY="${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}"
-if command -v npm 1> /dev/null; then
+if command -v npm 1>/dev/null; then
   REGISTRY=$(npm config get registry)
 fi
 

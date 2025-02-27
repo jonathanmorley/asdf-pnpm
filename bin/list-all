@@ -9,7 +9,7 @@ function sort_versions() {
 }
 
 REGISTRY="${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}"
-if command -v npm 1> /dev/null; then
+if command -v npm 1>/dev/null; then
   REGISTRY=$(npm config get registry)
 fi
 
