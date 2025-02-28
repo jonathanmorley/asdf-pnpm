@@ -22,4 +22,5 @@ curl \
   "${REGISTRY%/}/pnpm" |
   grep -Eo '"version":\s?"[^"]+"\s?' |
   cut -d\" -f4 |
-  sort_versions
+  sort_versions |
+  xargs
