@@ -25,10 +25,16 @@ download_and_extract() {
     tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
 }
 
-# Try with configured registry first, fall back to default if it fails
+# Try with configured registry first, fall back to default if it's different and the first attempt fails
 if ! download_and_extract "$REGISTRY" 2>/dev/null; then
-  echo "Download from configured registry failed, trying fallback registry..."
-  download_and_extract "$FALLBACK_REGISTRY"
+  # Remove trailing slashes for comparison
+  if [ "${REGISTRY%/}" != "${FALLBACK_REGISTRY%/}" ]; then
+    echo "Download from configured registry failed, trying fallback registry..."
+    download_and_extract "$FALLBACK_REGISTRY"
+  else
+    echo "Download from registry failed."
+    exit 1
+  fi
 fi
 
 # v1 doesn't have a bin/dir (its binaries are in lib/bin)
