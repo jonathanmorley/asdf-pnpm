@@ -7,18 +7,29 @@ if [[ "${ASDF_INSTALL_TYPE:-version}" == 'ref' ]]; then
   exit 1
 fi
 
-REGISTRY="${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}"
+FALLBACK_REGISTRY='https://registry.npmjs.org/'
+
+REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
 if command -v npm 1>/dev/null; then
   REGISTRY=$(npm config get registry)
 fi
 
-TARBALL_URL="${REGISTRY%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
-
 mkdir -p "${ASDF_INSTALL_PATH}"
 
-echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${TARBALL_URL}"
-curl --silent --fail --show-error --location "${TARBALL_URL}" |
-  tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
+download_and_extract() {
+  local reg="$1"
+  local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+  
+  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
+  curl --silent --fail --location "${tarball_url}" |
+    tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
+}
+
+# Try with configured registry first, fall back to default if it fails
+if ! download_and_extract "$REGISTRY" 2>/dev/null; then
+  echo "Download from configured registry failed, trying fallback registry..."
+  download_and_extract "$FALLBACK_REGISTRY"
+fi
 
 # v1 doesn't have a bin/dir (its binaries are in lib/bin)
 mkdir -p "${ASDF_INSTALL_PATH}/bin"
