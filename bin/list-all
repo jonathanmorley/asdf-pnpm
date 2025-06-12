@@ -30,7 +30,7 @@ fetch_versions() {
 }
 
 # Try with configured registry first, fall back to default only if it's different and the first attempt fails
-if [[ "$REGISTRY" == "$FALLBACK_REGISTRY" ]]; then
+if [ "${REGISTRY%/}" == "${FALLBACK_REGISTRY%/}" ]; then
   fetch_versions "$REGISTRY"
 else
   fetch_versions "$REGISTRY" || fetch_versions "$FALLBACK_REGISTRY"
