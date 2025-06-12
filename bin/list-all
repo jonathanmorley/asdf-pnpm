@@ -29,5 +29,9 @@ fetch_versions() {
     xargs
 }
 
-# Try with configured registry first, fall back to default if it fails
-fetch_versions "$REGISTRY" || fetch_versions "$FALLBACK_REGISTRY"
+# Try with configured registry first, fall back to default only if it's different and the first attempt fails
+if [[ "$REGISTRY" == "$FALLBACK_REGISTRY" ]]; then
+  fetch_versions "$REGISTRY"
+else
+  fetch_versions "$REGISTRY" || fetch_versions "$FALLBACK_REGISTRY"
+fi
