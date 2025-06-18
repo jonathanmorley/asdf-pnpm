@@ -19,7 +19,7 @@ mkdir -p "${ASDF_INSTALL_PATH}"
 download_and_extract() {
   local reg="$1"
   local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
-  
+
   echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
   curl --silent --fail --location "${tarball_url}" |
     tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
