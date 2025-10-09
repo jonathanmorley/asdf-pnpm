@@ -15,18 +15,91 @@ if command -v npm 1>/dev/null; then
   REGISTRY=$(npm config get registry)
 fi
 
+get_auth_header() {
+  local reg="$1"
+  local auth_header=""
+
+  # Extract hostname from registry URL for auth token lookup
+  local hostname
+  hostname=$(echo "$reg" | sed -E 's|^https?://([^/]+).*|\1|')
+
+  # Function to read from .npmrc files
+  read_npmrc_auth() {
+    local host="$1"
+    local auth_token=""
+    local auth_basic=""
+
+    # Check project .npmrc first (current directory)
+    if [[ -f ".npmrc" ]]; then
+      auth_token=$(grep "^//${host}/:_authToken" ".npmrc" 2>/dev/null | cut -d'=' -f2)
+      if [[ -z "$auth_token" ]]; then
+        auth_basic=$(grep "^//${host}/:_auth" ".npmrc" 2>/dev/null | cut -d'=' -f2)
+      fi
+    fi
+
+    # Check user .npmrc if project .npmrc didn't have it
+    if [[ -z "$auth_token" && -z "$auth_basic" && -f "$HOME/.npmrc" ]]; then
+      auth_token=$(grep "^//${host}/:_authToken" "$HOME/.npmrc" 2>/dev/null | cut -d'=' -f2)
+      if [[ -z "$auth_token" ]]; then
+        auth_basic=$(grep "^//${host}/:_auth" "$HOME/.npmrc" 2>/dev/null | cut -d'=' -f2)
+      fi
+    fi
+
+    if [[ -n "$auth_token" ]]; then
+      echo "Bearer $auth_token"
+    elif [[ -n "$auth_basic" ]]; then
+      echo "Basic $auth_basic"
+    fi
+  }
+
+  # Try to read auth from .npmrc files
+  local npmrc_auth
+  npmrc_auth=$(read_npmrc_auth "$hostname")
+  if [[ -n "$npmrc_auth" ]]; then
+    auth_header="Authorization: $npmrc_auth"
+  fi
+
+  # Fallback to environment variables
+  if [[ -z "$auth_header" ]]; then
+    if [[ -n "${NPM_TOKEN:-}" ]]; then
+      auth_header="Authorization: Bearer $NPM_TOKEN"
+    elif [[ -n "${NPM_AUTH_TOKEN:-}" ]]; then
+      auth_header="Authorization: Bearer $NPM_AUTH_TOKEN"
+    fi
+  fi
+
+  echo "$auth_header"
+}
+
 fetch_versions() {
   local reg="$1"
-  curl \
-    --silent \
-    --fail \
-    --location \
-    --header 'Accept: application/vnd.npm.install-v1+json' \
-    "${reg%/}/pnpm" |
-    grep -Eo '"version":\s?"[^"]+"\s?' |
-    cut -d\" -f4 |
-    sort_versions |
-    xargs
+  local auth_header
+  auth_header=$(get_auth_header "$reg")
+
+  if [[ -n "$auth_header" ]]; then
+    curl \
+      --silent \
+      --fail \
+      --location \
+      --header 'Accept: application/vnd.npm.install-v1+json' \
+      --header "$auth_header" \
+      "${reg%/}/pnpm" |
+      grep -Eo '"version":\s?"[^"]+"\s?' |
+      cut -d\" -f4 |
+      sort_versions |
+      xargs
+  else
+    curl \
+      --silent \
+      --fail \
+      --location \
+      --header 'Accept: application/vnd.npm.install-v1+json' \
+      "${reg%/}/pnpm" |
+      grep -Eo '"version":\s?"[^"]+"\s?' |
+      cut -d\" -f4 |
+      sort_versions |
+      xargs
+  fi
 }
 
 # Try with configured registry first, fall back to default only if it's different and the first attempt fails
