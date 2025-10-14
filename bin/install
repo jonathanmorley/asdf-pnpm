@@ -7,56 +7,147 @@ if [[ "${ASDF_INSTALL_TYPE:-version}" == 'ref' ]]; then
   exit 1
 fi
 
-FALLBACK_REGISTRY='https://registry.npmjs.org/'
-
-REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
-if command -v npm 1>/dev/null; then
-  REGISTRY=$(npm config get registry)
-fi
-
-mkdir -p "${ASDF_INSTALL_PATH}"
-
-download_and_extract() {
-  local reg="$1"
-  local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
-
-  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
-  curl --silent --fail --location "${tarball_url}" |
-    tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
-}
-
-# Try with configured registry first, fall back to default if it's different and the first attempt fails
-if ! download_and_extract "$REGISTRY" 2>/dev/null; then
-  # Remove trailing slashes for comparison
-  if [ "${REGISTRY%/}" != "${FALLBACK_REGISTRY%/}" ]; then
-    echo "Download from configured registry failed, trying fallback registry..."
-    download_and_extract "$FALLBACK_REGISTRY"
-  else
-    echo "Download from registry failed."
-    exit 1
-  fi
-fi
-
-# v1 doesn't have a bin/dir (its binaries are in lib/bin)
 mkdir -p "${ASDF_INSTALL_PATH}/bin"
 
-BINARIES=('pnpm' 'pnpx')
-for bin in "${BINARIES[@]}"; do
-  BINARY_PATHS=(
-    "${ASDF_INSTALL_PATH}/bin/${bin}.cjs"    #v6
-    "${ASDF_INSTALL_PATH}/bin/${bin}.js"     #v2 - v5
-    "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" #v1
-  )
+# Check if this version has prebuilt binaries (v6.0.0+)
+version_has_binaries() {
+  local version="$1"
+  local major_version
+  major_version=$(echo "$version" | cut -d. -f1)
 
-  for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-    if [[ -f "${BINARY_PATH}" ]]; then
-      BIN_PATH="${BINARY_PATH}"
-      break
+  # Prebuilt binaries were introduced in v6.0.0
+  [ "$major_version" -ge 6 ]
+}
+
+detect_platform() {
+  local os arch
+
+  case "$(uname -s)" in
+    Darwin)
+      os="macos"
+      ;;
+    Linux)
+      os="linux"
+      ;;
+    CYGWIN* | MINGW* | MSYS*)
+      os="win"
+      ;;
+    *)
+      echo >&2 "⛔ Unsupported operating system: $(uname -s)"
+      exit 1
+      ;;
+  esac
+
+  case "$(uname -m)" in
+    x86_64 | amd64)
+      arch="x64"
+      ;;
+    arm64 | aarch64)
+      arch="arm64"
+      ;;
+    *)
+      echo >&2 "⛔ Unsupported architecture: $(uname -m)"
+      exit 1
+      ;;
+  esac
+
+  echo "${os}-${arch}"
+}
+
+download_binary() {
+  local platform="$1"
+  local binary_name="$2"
+  local extension=""
+
+  # Windows binaries have .exe extension
+  if [[ "$platform" == win-* ]]; then
+    extension=".exe"
+  fi
+
+  local github_url="https://github.com/pnpm/pnpm/releases/download/v${ASDF_INSTALL_VERSION}/pnpm-${platform}${extension}"
+  local target_path="${ASDF_INSTALL_PATH}/bin/${binary_name}"
+
+  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} for ${platform} from GitHub releases"
+
+  if ! curl --silent --fail --location "${github_url}" -o "${target_path}"; then
+    echo >&2 "⛔ Failed to download pnpm binary from ${github_url}"
+    return 1
+  fi
+
+  chmod +x "${target_path}"
+}
+
+download_and_extract_npm() {
+  local fallback_registry='https://registry.npmjs.org/'
+  local registry="${NPM_CONFIG_REGISTRY:-$fallback_registry/}"
+
+  if command -v npm 1>/dev/null; then
+    registry=$(npm config get registry)
+  fi
+
+  mkdir -p "${ASDF_INSTALL_PATH}"
+
+  local tarball_url="${registry%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from npm registry (${tarball_url})"
+
+  if ! curl --silent --fail --location "${tarball_url}" | tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"; then
+    # Try fallback registry if different
+    if [ "${registry%/}" != "${fallback_registry%/}" ]; then
+      echo "Download from configured registry failed, trying fallback registry..."
+      tarball_url="${fallback_registry%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+      if ! curl --silent --fail --location "${tarball_url}" | tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"; then
+        echo >&2 "⛔ Failed to download from npm registry"
+        return 1
+      fi
+    else
+      echo >&2 "⛔ Failed to download from npm registry"
+      return 1
     fi
+  fi
+
+  # Handle different binary locations across versions
+  mkdir -p "${ASDF_INSTALL_PATH}/bin"
+
+  local binaries=('pnpm' 'pnpx')
+  for bin in "${binaries[@]}"; do
+    local binary_paths=(
+      "${ASDF_INSTALL_PATH}/bin/${bin}.cjs"    # v6+
+      "${ASDF_INSTALL_PATH}/bin/${bin}.js"     # v2-v5
+      "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" # v1
+    )
+
+    local bin_path=""
+    for binary_path in "${binary_paths[@]}"; do
+      if [[ -f "${binary_path}" ]]; then
+        bin_path="${binary_path}"
+        break
+      fi
+    done
+
+    if [[ -z "$bin_path" ]]; then
+      echo >&2 "⛔ Could not find ${bin} binary in expected locations"
+      return 1
+    fi
+
+    # v1 to v2 binaries are not executable by default
+    chmod +x "${bin_path}"
+    ln -sf "${bin_path}" "${ASDF_INSTALL_PATH}/bin/${bin}"
   done
+}
 
-  # v1 to v2 binaries are not executable
-  chmod +x "${BIN_PATH}"
+if version_has_binaries "$ASDF_INSTALL_VERSION"; then
+  # Try GitHub releases first for v6.0.0+
+  PLATFORM=$(detect_platform)
 
-  ln -sf "${BIN_PATH}" "${ASDF_INSTALL_PATH}/bin/${bin}"
-done
+  if download_binary "$PLATFORM" "pnpm"; then
+    # Create pnpx as a symlink to pnpm (pnpx is just pnpm with different behavior based on argv[0])
+    ln -sf "pnpm" "${ASDF_INSTALL_PATH}/bin/pnpx"
+  else
+    echo "GitHub releases download failed, falling back to npm registry..."
+    download_and_extract_npm
+  fi
+else
+  # Use npm registry for older versions (< v6.0.0)
+  echo "Using npm registry for pnpm v${ASDF_INSTALL_VERSION} (prebuilt binaries not available)"
+  download_and_extract_npm
+fi

@@ -87,12 +87,16 @@ jobs:
         with:
           command: pnpm --version
           version: latest:${{ matrix.version }}
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test pnpx
         if: matrix.version < 7
         uses: asdf-vm/actions/plugin-test@v3
         with:
           command: pnpx --version
           version: latest:${{ matrix.version }}
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   lint:
     runs-on: ubuntu-latest
     steps:
