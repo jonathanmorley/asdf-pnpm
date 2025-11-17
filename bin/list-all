@@ -23,8 +23,7 @@ fetch_versions() {
     --location \
     --header 'Accept: application/vnd.npm.install-v1+json' \
     "${reg%/}/pnpm" |
-    grep -Eo '"version":\s?"[^"]+"\s?' |
-    cut -d\" -f4 |
+    jq -r '.versions | keys[]' |
     sort_versions |
     xargs
 }
