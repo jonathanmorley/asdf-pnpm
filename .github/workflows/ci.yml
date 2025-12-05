@@ -8,7 +8,7 @@ on:
 
 jobs:
   asdf-plugin-test:
-     strategy:
+    strategy:
       matrix:
         runner:
           - ubuntu-latest
