@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-if [[ "${ASDF_INSTALL_TYPE:-version}" == 'ref' ]]; then
+if [[ ${ASDF_INSTALL_TYPE:-version} == 'ref' ]]; then
   echo >&2 "⛔ This plugin does not support installing by ref."
   exit 1
 fi
@@ -49,7 +49,7 @@ for bin in "${BINARIES[@]}"; do
   )
 
   for BINARY_PATH in "${BINARY_PATHS[@]}"; do
-    if [[ -f "${BINARY_PATH}" ]]; then
+    if [[ -f ${BINARY_PATH} ]]; then
       BIN_PATH="${BINARY_PATH}"
       break
     fi
