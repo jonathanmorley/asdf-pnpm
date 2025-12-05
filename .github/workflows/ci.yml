@@ -1,4 +1,4 @@
-name: Nix
+name: CI
 
 on:
   push:
@@ -7,7 +7,35 @@ on:
     branches: [master]
 
 jobs:
-  check:
+  asdf-plugin-test:
+     strategy:
+      matrix:
+        runner:
+          - ubuntu-latest
+          - macos-latest
+          - ubuntu-24.04-arm
+          - macos-15-intel
+        # Compatibility matrix from https://pnpm.io/installation#compatibility
+        pnpm:
+          - 8
+          - 9
+          - 10
+        node:
+          - 20
+          - 22
+          - 24
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Test pnpm
+        uses: asdf-vm/actions/plugin-test@v3
+        with:
+          command: pnpm --version
+          version: latest:${{ matrix.pnpm }}
+  nix:
     strategy:
       matrix:
         include:
