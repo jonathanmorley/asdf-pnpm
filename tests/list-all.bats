@@ -61,3 +61,9 @@ setup() {
   
   [ "$INVALID_COUNT" -le 5 ]
 }
+
+@test "list-all does not return 24.x versions" {
+  VERSIONS=$("$PLUGIN_DIR/bin/list-all")
+  # 24.x versions are incorrectly published and should be filtered out
+  [[ ! " $VERSIONS " == *" 24."* ]]
+}
