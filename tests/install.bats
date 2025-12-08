@@ -19,6 +19,11 @@ install_pnpm() {
 
   rm -rf "$ASDF_INSTALL_PATH"
   bash "$PLUGIN_DIR/bin/install"
+
+  # Patch shebangs for Nix sandbox compatibility
+  if [ -n "${PATCH_SHEBANGS_SCRIPT:-}" ] && [ -x "$PATCH_SHEBANGS_SCRIPT" ]; then
+    bash "$PATCH_SHEBANGS_SCRIPT" "$ASDF_INSTALL_PATH"/bin/*
+  fi
 }
 
 get_versions_to_test() {
