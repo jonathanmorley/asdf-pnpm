@@ -5,6 +5,16 @@ setup() {
   export PLUGIN_DIR
 }
 
+# Build a test command that patches shebangs if NIX_NODE_PATH is set, then runs pnpm --version
+get_test_command() {
+  if [ -n "${NIX_NODE_PATH:-}" ]; then
+    # Patch shebangs before running pnpm
+    echo "for f in bin/pnpm.cjs bin/pnpm.js lib/bin/pnpm.js; do [ -f \"\$f\" ] && sed -i \"1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|\" \"\$f\"; done; pnpm --version"
+  else
+    echo "pnpm --version"
+  fi
+}
+
 @test "asdf plugin test v8" {
   # Resolve latest v8 version (asdf plugin test doesn't support latest:X syntax in Go version)
   local version
@@ -19,7 +29,7 @@ setup() {
     pnpm-test-v8 \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
-    'pnpm --version'
+    "$(get_test_command)"
 }
 
 @test "asdf plugin test v9" {
@@ -36,7 +46,7 @@ setup() {
     pnpm-test-v9 \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
-    'pnpm --version'
+    "$(get_test_command)"
 }
 
 @test "asdf plugin test v10" {
@@ -53,5 +63,5 @@ setup() {
     pnpm-test-v10 \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
-    'pnpm --version'
+    "$(get_test_command)"
 }

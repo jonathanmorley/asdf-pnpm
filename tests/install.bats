@@ -22,12 +22,11 @@ install_pnpm() {
 
   # Patch shebangs for Nix sandbox compatibility
   if [ -n "${NIX_NODE_PATH:-}" ]; then
-    for f in "$ASDF_INSTALL_PATH"/bin/*; do
+    for f in "$ASDF_INSTALL_PATH"/bin/*.cjs "$ASDF_INSTALL_PATH"/bin/*.js "$ASDF_INSTALL_PATH"/lib/bin/*.js; do
       if [ -f "$f" ] && head -1 "$f" | grep -q '^#!/usr/bin/env node'; then
-        sed -i.bak "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$f"
-        rm -f "$f.bak"
+        sed -i "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$f"
       fi
-    done
+    done 2>/dev/null || true
   fi
 }
 
