@@ -13,8 +13,10 @@ setup() {
     echo "Failed to resolve latest v8 version"
     return 1
   }
+  # Remove any leftover test plugin
+  asdf plugin remove pnpm-test-v8 2>/dev/null || true
   asdf plugin test \
-    pnpm \
+    pnpm-test-v8 \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
     'pnpm --version'
@@ -28,8 +30,10 @@ setup() {
     echo "Failed to resolve latest v9 version"
     return 1
   }
+  # Remove any leftover test plugin
+  asdf plugin remove pnpm-test-v9 2>/dev/null || true
   asdf plugin test \
-    pnpm \
+    pnpm-test-v9 \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
     'pnpm --version'
@@ -43,8 +47,10 @@ setup() {
     echo "Failed to resolve latest v10 version"
     return 1
   }
+  # Remove any leftover test plugin
+  asdf plugin remove pnpm-test-v10 2>/dev/null || true
   asdf plugin test \
-    pnpm \
+    pnpm-test-v10 \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
     'pnpm --version'
