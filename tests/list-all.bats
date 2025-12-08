@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 setup() {
-  PLUGIN_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  PLUGIN_DIR="${ASDF_PNPM_PLUGIN_REPO}"
   export PLUGIN_DIR
 }
 

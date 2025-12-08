@@ -66,7 +66,7 @@
             outputHashMode = "recursive";
             outputHash = testSrcHash;
 
-            nativeBuildInputs = [
+            nativeCheckInputs = [
               pkgs.asdf-vm
               pkgs.bats
               pkgs.cacert
@@ -82,21 +82,19 @@
 
             dontUnpack = true;
             dontConfigure = true;
+            dontFixup = true;
             doCheck = true;
 
             buildPhase = ''
-              export HOME=$(mktemp -d)
-              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-
               cp -r "${pluginRepo}" plugin-repo
-            '';
-
-            fixupPhase = ''
+              chmod -R u+w plugin-repo
               patchShebangs plugin-repo/bin/*
+              export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
             '';
 
             checkPhase = ''
-              export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
+              export HOME=$(mktemp -d)
+              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               bats ${testSrc}/tests/*.bats
             '';
 
