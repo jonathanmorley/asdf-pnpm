@@ -36,7 +36,7 @@ setup() {
 
 @test "latest-stable excludes prerelease versions" {
   # Ensure the output is a stable version (no alpha, beta, rc, etc.)
-  run "${PLUGIN_DIR}/bin/latest-stable"
+  run "$PLUGIN_DIR/bin/latest-stable"
   [ "$status" -eq 0 ]
   # Should not contain prerelease identifiers
   [[ ! $output =~ (alpha|beta|rc|dev|canary|-) ]]
