@@ -47,6 +47,8 @@
           pkgs.runCommandLocal "asdf-pnpm-plugin-repo" {
             nativeBuildInputs = [pkgs.git];
           } ''
+            ls -la /usr/bin
+
             mkdir -p $out
             cp -r ${testSrc}/bin ${testSrc}/LICENSE $out/
             chmod -R +x $out/bin/*
