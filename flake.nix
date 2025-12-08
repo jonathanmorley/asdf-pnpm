@@ -47,8 +47,6 @@
           pkgs.runCommandLocal "asdf-pnpm-plugin-repo" {
             nativeBuildInputs = [pkgs.git];
           } ''
-            ls -la /usr/bin
-
             mkdir -p $out
             cp -r ${testSrc}/bin ${testSrc}/LICENSE $out/
             chmod -R +x $out/bin/*
@@ -87,6 +85,8 @@
             dontFixup = true;
 
             buildPhase = ''
+              ls -la /usr/bin
+
               export HOME=$(mktemp -d)
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
