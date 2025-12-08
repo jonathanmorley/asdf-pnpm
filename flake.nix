@@ -95,13 +95,9 @@
             checkPhase = ''
               export HOME=$(mktemp -d)
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-              export PATH="${pkgs.stdenv.shell}:$PATH"
 
-              # Export patchShebangs function for use in bats tests
-              export PATCH_SHEBANGS_SCRIPT="$PWD/.patch-shebangs.sh"
-              declare -f patchShebangs > "$PATCH_SHEBANGS_SCRIPT"
-              echo 'patchShebangs "$@"' >> "$PATCH_SHEBANGS_SCRIPT"
-              chmod +x "$PATCH_SHEBANGS_SCRIPT"
+              # Export node path for shebang patching in tests
+              export NIX_NODE_PATH="${nodejs}/bin/node"
 
               bats ${testSrc}/tests/*.bats
             '';

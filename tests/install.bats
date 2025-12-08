@@ -21,8 +21,13 @@ install_pnpm() {
   bash "$PLUGIN_DIR/bin/install"
 
   # Patch shebangs for Nix sandbox compatibility
-  if [ -n "${PATCH_SHEBANGS_SCRIPT:-}" ] && [ -x "$PATCH_SHEBANGS_SCRIPT" ]; then
-    bash "$PATCH_SHEBANGS_SCRIPT" "$ASDF_INSTALL_PATH"/bin/*
+  if [ -n "${NIX_NODE_PATH:-}" ]; then
+    for f in "$ASDF_INSTALL_PATH"/bin/*; do
+      if [ -f "$f" ] && head -1 "$f" | grep -q '^#!/usr/bin/env node'; then
+        sed -i.bak "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$f"
+        rm -f "$f.bak"
+      fi
+    done
   fi
 }
 
