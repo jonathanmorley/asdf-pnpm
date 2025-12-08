@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 
 set -Eeuo pipefail
 
@@ -7,34 +8,13 @@ if [[ ${ASDF_INSTALL_TYPE:-version} == 'ref' ]]; then
   exit 1
 fi
 
-FALLBACK_REGISTRY='https://registry.npmjs.org/'
-
-REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
-if command -v npm 1>/dev/null; then
-  REGISTRY=$(npm config get registry)
-fi
-
-mkdir -p "${ASDF_INSTALL_PATH}"
-
-download_and_extract() {
-  local reg="$1"
-  local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
-
-  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
-  curl --silent --fail --location "${tarball_url}" |
-    tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_INSTALL_PATH}"
-}
-
-# Try with configured registry first, fall back to default if it's different and the first attempt fails
-if ! download_and_extract "$REGISTRY" 2>/dev/null; then
-  # Remove trailing slashes for comparison
-  if [ "${REGISTRY%/}" != "${FALLBACK_REGISTRY%/}" ]; then
-    echo "Download from configured registry failed, trying fallback registry..."
-    download_and_extract "$FALLBACK_REGISTRY"
-  else
-    echo "Download from registry failed."
-    exit 1
-  fi
+if [[ -n ${ASDF_DOWNLOAD_PATH:-} ]]; then
+  echo "Using ASDF_DOWNLOAD_PATH: ${ASDF_DOWNLOAD_PATH}"
+  cp -r "${ASDF_DOWNLOAD_PATH}"/* "${ASDF_INSTALL_PATH}"/
+else
+  # Legacy path: download directly to install path
+  export ASDF_DOWNLOAD_PATH="${ASDF_INSTALL_PATH}"
+  bash "$(dirname "$0")/download"
 fi
 
 # v1 doesn't have a bin/dir (its binaries are in lib/bin)
@@ -42,6 +22,7 @@ mkdir -p "${ASDF_INSTALL_PATH}/bin"
 
 BINARIES=('pnpm' 'pnpx')
 for bin in "${BINARIES[@]}"; do
+  BIN_PATH=""
   BINARY_PATHS=(
     "${ASDF_INSTALL_PATH}/bin/${bin}.cjs"    #v6
     "${ASDF_INSTALL_PATH}/bin/${bin}.js"     #v2 - v5
@@ -54,6 +35,11 @@ for bin in "${BINARIES[@]}"; do
       break
     fi
   done
+
+  if [[ -z $BIN_PATH ]]; then
+    echo >&2 "Could not find ${bin} binary in any expected location"
+    exit 1
+  fi
 
   # v1 to v2 binaries are not executable
   chmod +x "${BIN_PATH}"

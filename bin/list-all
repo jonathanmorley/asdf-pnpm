@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 
 set -Eeuo pipefail
 
@@ -17,12 +18,18 @@ fi
 
 fetch_versions() {
   local reg="$1"
-  curl \
+  local response
+  if ! response=$(curl \
     --silent \
+    --show-error \
     --fail \
     --location \
     --header 'Accept: application/vnd.npm.install-v1+json' \
-    "${reg%/}/pnpm" |
+    "${reg%/}/pnpm" 2>&1); then
+    echo >&2 "Failed to fetch versions from ${reg}: ${response}"
+    return 1
+  fi
+  echo "$response" |
     grep -Eo '"[0-9]+\.[0-9]+\.[0-9]+[^"]*":\{"name":"pnpm"' |
     grep -Eo '^"[^"]+"' |
     tr -d '"' |

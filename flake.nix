@@ -28,6 +28,7 @@
           fileset = lib.fileset.unions [
             ./bin
             ./tests
+            ./LICENSE
           ];
         };
 
@@ -40,6 +41,21 @@
           )
         );
 
+        # Git repo containing just the plugin for `asdf plugin-test`
+        pluginRepo =
+          pkgs.runCommandLocal "asdf-pnpm-plugin-repo" {
+            nativeBuildInputs = [pkgs.git];
+          } ''
+            mkdir -p $out
+            cp -r ${testSrc}/bin ${testSrc}/LICENSE $out/
+            chmod -R +x $out/bin/*
+            git -C $out init
+            git -C $out config user.name "Test Runner"
+            git -C $out config user.email "test@example.com"
+            git -C $out add .
+            git -C $out commit -m "Test snapshot" >/dev/null
+          '';
+
         # Fixed-output derivation that runs bats tests with network access
         mkCheck = name: nodejs:
           pkgs.stdenvNoCC.mkDerivation {
@@ -50,9 +66,10 @@
             outputHash = testSrcHash;
 
             nativeBuildInputs = [
+              pkgs.asdf-vm
               pkgs.bats
               pkgs.curl
-              pkgs.cacert
+              pkgs.git
               pkgs.gnutar
               pkgs.gzip
               pkgs.coreutils
@@ -67,7 +84,9 @@
 
             buildPhase = ''
               export HOME=$(mktemp -d)
-              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+
+              cp -r "${pluginRepo}" plugin-repo
+              export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
               bats ${testSrc}/tests/*.bats
             '';
 

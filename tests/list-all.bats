@@ -20,7 +20,7 @@ setup() {
 @test "list-all returns space-separated versions" {
   VERSIONS=$("$PLUGIN_DIR/bin/list-all")
   # Should not contain newlines within the output
-  [[ ! "$VERSIONS" == *$'\n'* ]]
+  [[ $VERSIONS != *$'\n'* ]]
 }
 
 @test "list-all includes known versions" {
@@ -37,10 +37,10 @@ setup() {
   VERSIONS=$("$PLUGIN_DIR/bin/list-all")
   FIRST_VERSION=$(echo "$VERSIONS" | cut -d' ' -f1)
   LAST_VERSION=$(echo "$VERSIONS" | awk '{print $NF}')
-  
+
   FIRST_MAJOR=$(echo "$FIRST_VERSION" | cut -d. -f1)
   LAST_MAJOR=$(echo "$LAST_VERSION" | cut -d. -f1)
-  
+
   # First major version should be less than or equal to last
   [ "$FIRST_MAJOR" -le "$LAST_MAJOR" ]
 }
@@ -48,9 +48,9 @@ setup() {
 @test "list-all versions match semver format" {
   VERSIONS=$("$PLUGIN_DIR/bin/list-all")
   INVALID_COUNT=0
-  
+
   for version in $VERSIONS; do
-    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+    if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
       ((INVALID_COUNT++)) || true
     fi
     # Only check first 50 to keep test fast
@@ -58,12 +58,12 @@ setup() {
       break
     fi
   done
-  
+
   [ "$INVALID_COUNT" -le 5 ]
 }
 
 @test "list-all does not return 24.x versions" {
   VERSIONS=$("$PLUGIN_DIR/bin/list-all")
   # 24.x versions are incorrectly published and should be filtered out
-  [[ ! " $VERSIONS " == *" 24."* ]]
+  [[ " $VERSIONS " != *" 24."* ]]
 }

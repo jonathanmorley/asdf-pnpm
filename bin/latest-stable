@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+
+# Outputs the latest stable version matching the optional filter prefix
+# Usage: bin/latest-stable [filter]
+# Example: bin/latest-stable 8 -> 8.15.9
+
+set -Eeuo pipefail
+
+filter="${1:-}"
+plugin_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Get all versions from list-all
+all_versions=$("${plugin_dir}/bin/list-all")
+
+# Filter to only stable versions (major.minor.patch, no prerelease tags)
+# and apply the optional prefix filter
+versions=$(echo "$all_versions" | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$')
+
+if [[ -n $filter ]]; then
+  versions=$(echo "$versions" | grep -E "^${filter}\." || echo "")
+fi
+
+# Return the last (latest) matching version
+echo "$versions" | tail -1
