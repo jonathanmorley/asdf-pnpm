@@ -82,15 +82,20 @@
 
             dontUnpack = true;
             dontConfigure = true;
-            dontFixup = true;
+            doCheck = true;
 
             buildPhase = ''
-              ls -la /usr/bin
-
               export HOME=$(mktemp -d)
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
               cp -r "${pluginRepo}" plugin-repo
+            '';
+
+            fixupPhase = ''
+              patchShebangs plugin-repo/bin/*
+            '';
+
+            checkPhase = ''
               export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
               bats ${testSrc}/tests/*.bats
             '';
