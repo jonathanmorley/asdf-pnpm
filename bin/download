@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+
+set -Eeuo pipefail
+
+if [[ ${ASDF_INSTALL_TYPE:-version} == 'ref' ]]; then
+  echo >&2 "⛔ This plugin does not support installing by ref."
+  exit 1
+fi
+
+FALLBACK_REGISTRY='https://registry.npmjs.org/'
+
+REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
+if command -v npm 1>/dev/null; then
+  REGISTRY=$(npm config get registry)
+fi
+
+mkdir -p "${ASDF_DOWNLOAD_PATH}"
+
+download_and_extract() {
+  local reg="$1"
+  local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+
+  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
+  curl --silent --fail --location "${tarball_url}" |
+    tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_DOWNLOAD_PATH}"
+}
+
+# Try with configured registry first, fall back to default if it's different and the first attempt fails
+if ! download_and_extract "$REGISTRY" 2>/dev/null; then
+  # Remove trailing slashes for comparison
+  if [ "${REGISTRY%/}" != "${FALLBACK_REGISTRY%/}" ]; then
+    echo "Download from configured registry failed, trying fallback registry..."
+    download_and_extract "$FALLBACK_REGISTRY"
+  else
+    echo "Download from registry failed."
+    exit 1
+  fi
+fi

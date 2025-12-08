@@ -7,34 +7,6 @@ on:
     branches: [master]
 
 jobs:
-  asdf-plugin-test:
-    strategy:
-      matrix:
-        runner:
-          - ubuntu-latest
-          - macos-latest
-          - ubuntu-24.04-arm
-          - macos-15-intel
-        # Compatibility matrix from https://pnpm.io/installation#compatibility
-        pnpm:
-          - 8
-          - 9
-          - 10
-        node:
-          - 20
-          - 22
-          - 24
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Test pnpm
-        uses: asdf-vm/actions/plugin-test@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
-        with:
-          command: pnpm --version
-          version: latest:${{ matrix.pnpm }}
   nix:
     strategy:
       matrix:

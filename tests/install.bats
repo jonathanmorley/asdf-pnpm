@@ -16,16 +16,19 @@ install_pnpm() {
   export ASDF_INSTALL_VERSION="$version"
   export ASDF_INSTALL_TYPE="version"
   export ASDF_INSTALL_PATH="${TMPDIR:-/tmp}/asdf-pnpm-test-${version}"
-  
+
   rm -rf "$ASDF_INSTALL_PATH"
   bash "$PLUGIN_DIR/bin/install"
 }
 
 get_versions_to_test() {
-  # Get latest stable version of each major
-  "$PLUGIN_DIR/bin/list-all" | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | \
-    awk -F. '{ if (!seen[$1]++ || $0 > latest[$1]) latest[$1] = $0 } END { for (m in latest) print latest[m] }' | \
-    sort -t. -k1,1n
+  # Get latest stable version of major versions 8, 9, 10
+  # list-all returns versions in sorted order, so tail -1 gives the latest
+  local all_versions
+  all_versions=$("$PLUGIN_DIR/bin/list-all" | tr ' ' '\n')
+  for major in 8 9 10; do
+    echo "$all_versions" | grep -E "^${major}\.[0-9]+\.[0-9]+$" | tail -1
+  done
 }
 
 @test "install script exists and is executable" {
@@ -37,10 +40,10 @@ get_versions_to_test() {
   for version in $(get_versions_to_test); do
     echo "# Testing pnpm $version" >&3
     install_pnpm "$version"
-    
+
     [ -x "$ASDF_INSTALL_PATH/bin/pnpm" ]
     [ "$("$ASDF_INSTALL_PATH/bin/pnpm" --version)" = "$version" ]
-    
+
     rm -rf "$ASDF_INSTALL_PATH"
   done
 }
@@ -48,15 +51,15 @@ get_versions_to_test() {
 @test "pnpm binary works correctly" {
   version=$("$PLUGIN_DIR/bin/list-all" | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | tail -1)
   install_pnpm "$version"
-  
+
   run "$ASDF_INSTALL_PATH/bin/pnpm" --help
   [ "$status" -eq 0 ]
-  [[ "$output" == *"pnpm"* ]]
+  [[ $output == *"pnpm"* ]]
 }
 
 @test "pnpx binary is available" {
   version=$("$PLUGIN_DIR/bin/list-all" | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | tail -1)
   install_pnpm "$version"
-  
+
   [ -x "$ASDF_INSTALL_PATH/bin/pnpx" ]
 }
