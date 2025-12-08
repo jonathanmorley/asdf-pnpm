@@ -28,6 +28,7 @@
           fileset = lib.fileset.unions [
             ./bin
             ./tests
+            ./flake.nix
             ./LICENSE
           ];
         };
@@ -88,7 +89,6 @@
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
               cp -r "${pluginRepo}" plugin-repo
-              chmod -R u+w plugin-repo
               export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
               bats ${testSrc}/tests/*.bats
             '';
