@@ -20,9 +20,15 @@ mkdir -p "${ASDF_DOWNLOAD_PATH}"
 download_and_extract() {
   local reg="$1"
   local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+  local curl_opts=(--silent --fail --location)
+  
+  # Use explicit CA bundle if SSL_CERT_FILE is set (for Nix sandbox compatibility)
+  if [[ -n "${SSL_CERT_FILE:-}" ]]; then
+    curl_opts+=(--cacert "$SSL_CERT_FILE")
+  fi
 
   echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
-  curl --silent --fail --location "${tarball_url}" |
+  curl "${curl_opts[@]}" "${tarball_url}" |
     tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_DOWNLOAD_PATH}"
 }
 

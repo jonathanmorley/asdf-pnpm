@@ -86,6 +86,7 @@
             doCheck = true;
 
             buildPhase = ''
+              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               cp -r "${pluginRepo}" plugin-repo
               chmod -R u+w plugin-repo
               patchShebangs plugin-repo/bin/*
