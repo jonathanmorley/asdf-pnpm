@@ -66,6 +66,16 @@ get_versions_to_test() {
   [[ $output == *"pnpm"* ]]
 }
 
+@test "pnpm dlx works correctly" {
+  for version in $(get_versions_to_test); do
+    install_pnpm "$version"
+
+    run "$ASDF_INSTALL_PATH/bin/pnpm" dlx npm help
+    [ "$status" -eq 0 ]
+    [[ $output == *"npm <command>"* ]]
+  done
+}
+
 @test "pnpx binary is available" {
   version=$("$PLUGIN_DIR/bin/list-all" | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | tail -1)
   install_pnpm "$version"
