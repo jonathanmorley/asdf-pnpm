@@ -68,7 +68,6 @@
             nativeCheckInputs = [
               pkgs.asdf-vm
               pkgs.bats
-              pkgs.cacert
               pkgs.curl
               pkgs.git
               pkgs.gnutar
@@ -85,7 +84,6 @@
             doCheck = true;
 
             buildPhase = ''
-              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               cp -r "${pluginRepo}" plugin-repo
               chmod -R u+w plugin-repo
               patchShebangs plugin-repo/bin/*
@@ -94,9 +92,6 @@
 
             checkPhase = ''
               export HOME=$(mktemp -d)
-              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-              export NIX_SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-              export CURL_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
               # Export node path for shebang patching in tests
               export NIX_NODE_PATH="${nodejs}/bin/node"

@@ -9,10 +9,10 @@ setup() {
 get_test_command() {
   if [ -n "${NIX_NODE_PATH:-}" ]; then
     # Patch shebangs before running pnpm
-    echo "for f in bin/pnpm.cjs bin/pnpm.js lib/bin/pnpm.js; do [ -f \"\$f\" ] && sed -i \"1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|\" \"\$f\"; done;"
+    echo "for f in bin/pnpm.cjs bin/pnpm.js lib/bin/pnpm.js; do [ -f \"\$f\" ] && sed -i \"1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|\" \"\$f\"; done; pnpm --version"
+  else
+    echo "pnpm --version"
   fi
-
-  echo "pnpm --version"
 }
 
 @test "asdf plugin test v8" {
