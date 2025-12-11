@@ -95,6 +95,8 @@
             checkPhase = ''
               export HOME=$(mktemp -d)
               export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+              export NIX_SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+              export CURL_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
               # Export node path for shebang patching in tests
               export NIX_NODE_PATH="${nodejs}/bin/node"
