@@ -6,7 +6,11 @@
 
 ## Requirements
 
-This plugin should work on Linux and Mac operating systems.
+Supported platforms:
+
+- Macos on ARM
+- Linux on x86-64
+- Linux on ARM
 
 ### Utilities
 
@@ -31,6 +35,16 @@ or for asdf \<0.16.0:
 
 ```
 asdf plugin-add pnpm
+```
+
+## Testing
+
+Use the following commands to run tests for all supported architectures (`--all-systems` does not appear to work correctly for this):
+
+```
+nix flake check --system aarch64-darwin
+nix flake check --system aarch64-linux
+nix flake check --system x86_64-linux
 ```
 
 [1]: https://asdf-vm.com/

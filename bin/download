@@ -8,28 +8,6 @@ if [[ ${ASDF_INSTALL_TYPE:-version} == 'ref' ]]; then
   exit 1
 fi
 
-# Find CA certificate bundle for curl
-find_ca_bundle() {
-  # Check common locations for CA bundles
-  local locations=(
-    "${SSL_CERT_FILE:-}"
-    "${NIX_SSL_CERT_FILE:-}"
-    "${CURL_CA_BUNDLE:-}"
-    "/etc/ssl/certs/ca-certificates.crt"
-    "/etc/pki/tls/certs/ca-bundle.crt"
-    "/etc/ssl/ca-bundle.pem"
-    "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
-    "/etc/ssl/cert.pem"
-  )
-  for loc in "${locations[@]}"; do
-    if [[ -n $loc && -f $loc ]]; then
-      echo "$loc"
-      return 0
-    fi
-  done
-  return 1
-}
-
 FALLBACK_REGISTRY='https://registry.npmjs.org/'
 
 REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
@@ -43,12 +21,6 @@ download_and_extract() {
   local reg="$1"
   local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
   local curl_opts=(--silent --fail --location)
-
-  # Use explicit CA bundle for Nix sandbox compatibility
-  local ca_bundle
-  if ca_bundle=$(find_ca_bundle); then
-    curl_opts+=(--cacert "$ca_bundle")
-  fi
 
   echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
   curl "${curl_opts[@]}" "${tarball_url}" |

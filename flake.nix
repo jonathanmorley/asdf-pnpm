@@ -19,6 +19,7 @@
       perSystem = {
         pkgs,
         lib,
+        system,
         ...
       }: let
         # Source filtered to only bin/ and tests/ - hash changes only when these change
@@ -52,6 +53,10 @@
             git -C $out init
             git -C $out config user.name "Test Runner"
             git -C $out config user.email "test@example.com"
+
+            # Patch shebangs (so asdf plugin test gets them when cloning)
+            patchShebangs $out/bin/*
+
             git -C $out add .
             git -C $out commit -m "Test snapshot" >/dev/null
           '';
@@ -59,7 +64,8 @@
         # Fixed-output derivation that runs bats tests with network access
         mkCheck = name: nodejs:
           pkgs.stdenvNoCC.mkDerivation {
-            name = "asdf-pnpm-check-${name}";
+            # Include system in name so each architecture is treated as a separate derivation
+            name = "bats-${name}-${system}";
 
             outputHashAlgo = "sha256";
             outputHashMode = "recursive";
@@ -68,6 +74,7 @@
             nativeCheckInputs = [
               pkgs.asdf-vm
               pkgs.bats
+              pkgs.cacert
               pkgs.curl
               pkgs.git
               pkgs.gnutar
@@ -85,13 +92,14 @@
 
             buildPhase = ''
               cp -r "${pluginRepo}" plugin-repo
-              chmod -R u+w plugin-repo
-              patchShebangs plugin-repo/bin/*
               export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
             '';
 
             checkPhase = ''
               export HOME=$(mktemp -d)
+
+              # Set CA cert environment variable
+              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
               # Export node path for shebang patching in tests
               export NIX_NODE_PATH="${nodejs}/bin/node"
