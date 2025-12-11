@@ -15,53 +15,45 @@ get_test_command() {
   fi
 }
 
-@test "asdf plugin test v8" {
-  # Resolve latest v8 version (asdf plugin test doesn't support latest:X syntax in Go version)
+# Helper function to test a specific major version of pnpm
+# Usage: test_pnpm_version <major_version>
+test_pnpm_version() {
+  local major_version="$1"
   local version
-  version=$("$PLUGIN_DIR/bin/latest-stable" 8)
+
+  # Resolve latest version for this major (asdf plugin test doesn't support latest:X syntax in Go version)
+  version=$("$PLUGIN_DIR/bin/latest-stable" "$major_version")
   [[ -n $version ]] || {
-    echo "Failed to resolve latest v8 version"
+    echo "Failed to resolve latest v${major_version} version"
     return 1
   }
+
   # Remove any leftover test plugin
-  asdf plugin remove pnpm-test-v8 2>/dev/null || true
+  asdf plugin remove "pnpm-test-v${major_version}" 2>/dev/null || true
+
   asdf plugin test \
-    pnpm-test-v8 \
+    "pnpm-test-v${major_version}" \
     "$PLUGIN_DIR" \
     --asdf-tool-version="$version" \
     "$(get_test_command)"
+}
+
+@test "asdf plugin test v6" {
+  test_pnpm_version 6
+}
+
+@test "asdf plugin test v7" {
+  test_pnpm_version 7
+}
+
+@test "asdf plugin test v8" {
+  test_pnpm_version 8
 }
 
 @test "asdf plugin test v9" {
-  # Resolve latest v9 version (asdf plugin test doesn't support latest:X syntax in Go version)
-  local version
-  version=$("$PLUGIN_DIR/bin/latest-stable" 9)
-  [[ -n $version ]] || {
-    echo "Failed to resolve latest v9 version"
-    return 1
-  }
-  # Remove any leftover test plugin
-  asdf plugin remove pnpm-test-v9 2>/dev/null || true
-  asdf plugin test \
-    pnpm-test-v9 \
-    "$PLUGIN_DIR" \
-    --asdf-tool-version="$version" \
-    "$(get_test_command)"
+  test_pnpm_version 9
 }
 
 @test "asdf plugin test v10" {
-  # Resolve latest v10 version (asdf plugin test doesn't support latest:X syntax in Go version)
-  local version
-  version=$("$PLUGIN_DIR/bin/latest-stable" 10)
-  [[ -n $version ]] || {
-    echo "Failed to resolve latest v10 version"
-    return 1
-  }
-  # Remove any leftover test plugin
-  asdf plugin remove pnpm-test-v10 2>/dev/null || true
-  asdf plugin test \
-    pnpm-test-v10 \
-    "$PLUGIN_DIR" \
-    --asdf-tool-version="$version" \
-    "$(get_test_command)"
+  test_pnpm_version 10
 }

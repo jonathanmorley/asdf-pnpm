@@ -16,6 +16,18 @@ setup() {
   [[ $output =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
+@test "latest-stable with filter 6 returns 6.x version" {
+  run "$PLUGIN_DIR/bin/latest-stable" 6
+  [ "$status" -eq 0 ]
+  [[ $output =~ ^6\.[0-9]+\.[0-9]+$ ]]
+}
+
+@test "latest-stable with filter 7 returns 7.x version" {
+  run "$PLUGIN_DIR/bin/latest-stable" 7
+  [ "$status" -eq 0 ]
+  [[ $output =~ ^7\.[0-9]+\.[0-9]+$ ]]
+}
+
 @test "latest-stable with filter 8 returns 8.x version" {
   run "$PLUGIN_DIR/bin/latest-stable" 8
   [ "$status" -eq 0 ]
