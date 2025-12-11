@@ -20,12 +20,12 @@ fetch_versions() {
   local reg="$1"
   local response
   local curl_opts=(--silent --show-error --fail --location --header 'Accept: application/vnd.npm.install-v1+json')
-  
+
   # Use explicit CA bundle if SSL_CERT_FILE is set (for Nix sandbox compatibility)
-  if [[ -n "${SSL_CERT_FILE:-}" ]]; then
+  if [[ -n ${SSL_CERT_FILE:-} ]]; then
     curl_opts+=(--cacert "$SSL_CERT_FILE")
   fi
-  
+
   if ! response=$(curl "${curl_opts[@]}" "${reg%/}/pnpm" 2>&1); then
     echo >&2 "Failed to fetch versions from ${reg}: ${response}"
     return 1
