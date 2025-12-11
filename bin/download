@@ -20,17 +20,15 @@ mkdir -p "${ASDF_DOWNLOAD_PATH}"
 download_and_extract() {
   local reg="$1"
   local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
-  local curl_opts=(--silent --fail --location)
 
   echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
-  curl "${curl_opts[@]}" "${tarball_url}" |
+  curl --silent --fail --location "${tarball_url}" |
     tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_DOWNLOAD_PATH}"
 }
 
-# Try with configured registry first, fall back to default if it's different and the first attempt fails
+# Try configured registry first, fall back to default if different and first attempt fails
 if ! download_and_extract "$REGISTRY" 2>/dev/null; then
-  # Remove trailing slashes for comparison
-  if [ "${REGISTRY%/}" != "${FALLBACK_REGISTRY%/}" ]; then
+  if [[ ${REGISTRY%/} != "${FALLBACK_REGISTRY%/}" ]]; then
     echo "Download from configured registry failed, trying fallback registry..."
     download_and_extract "$FALLBACK_REGISTRY"
   else

@@ -3,29 +3,7 @@
 
 set -Eeuo pipefail
 
-# Find CA certificate bundle for curl
-find_ca_bundle() {
-  # Check common locations for CA bundles
-  local locations=(
-    "${SSL_CERT_FILE:-}"
-    "${NIX_SSL_CERT_FILE:-}"
-    "${CURL_CA_BUNDLE:-}"
-    "/etc/ssl/certs/ca-certificates.crt"
-    "/etc/pki/tls/certs/ca-bundle.crt"
-    "/etc/ssl/ca-bundle.pem"
-    "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
-    "/etc/ssl/cert.pem"
-  )
-  for loc in "${locations[@]}"; do
-    if [[ -n $loc && -f $loc ]]; then
-      echo "$loc"
-      return 0
-    fi
-  done
-  return 1
-}
-
-function sort_versions() {
+sort_versions() {
   sed 'h; s/[-]/./g; s/\([[:digit:]]\+\)/.\1/g; s/$/.z/; G; s/\n/ /' |
     LC_ALL=C sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n -k 5,5n |
     awk '{print $2}'
@@ -41,18 +19,14 @@ fi
 fetch_versions() {
   local reg="$1"
   local response
-  local curl_opts=(--silent --show-error --fail --location --header 'Accept: application/vnd.npm.install-v1+json')
 
-  # Use explicit CA bundle for Nix sandbox compatibility
-  local ca_bundle
-  if ca_bundle=$(find_ca_bundle); then
-    curl_opts+=(--cacert "$ca_bundle")
-  fi
-
-  if ! response=$(curl "${curl_opts[@]}" "${reg%/}/pnpm" 2>&1); then
+  if ! response=$(curl --silent --show-error --fail --location \
+    --header 'Accept: application/vnd.npm.install-v1+json' \
+    "${reg%/}/pnpm" 2>&1); then
     echo >&2 "Failed to fetch versions from ${reg}: ${response}"
     return 1
   fi
+
   echo "$response" |
     grep -Eo '"[0-9]+\.[0-9]+\.[0-9]+[^"]*":\{"name":"pnpm"' |
     grep -Eo '^"[^"]+"' |
@@ -61,8 +35,8 @@ fetch_versions() {
     xargs
 }
 
-# Try with configured registry first, fall back to default only if it's different and the first attempt fails
-if [ "${REGISTRY%/}" == "${FALLBACK_REGISTRY%/}" ]; then
+# Try configured registry first, fall back to default if different and first attempt fails
+if [[ ${REGISTRY%/} == "${FALLBACK_REGISTRY%/}" ]]; then
   fetch_versions "$REGISTRY"
 else
   fetch_versions "$REGISTRY" || fetch_versions "$FALLBACK_REGISTRY"

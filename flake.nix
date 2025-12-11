@@ -78,7 +78,6 @@
               pkgs.curl
               pkgs.git
               pkgs.gnutar
-              pkgs.gzip
               pkgs.coreutils
               pkgs.gnugrep
               pkgs.gnused
