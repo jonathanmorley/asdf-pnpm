@@ -27,7 +27,6 @@
             name = "bats-${name}-${system}";
 
             __impure = true;
-            __noChroot = true;
 
             src = lib.fileset.toSource {
               root = ./.;
