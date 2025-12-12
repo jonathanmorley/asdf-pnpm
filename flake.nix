@@ -83,6 +83,7 @@
             checkPhase = ''
               export ASDF_PNPM_PLUGIN_REPO="$out"
               export HOME=$(mktemp -d)
+              export NODE_EXTRA_CA_CERTS="$SSL_CERT_FILE"
 
               bats $src/tests/*.bats
             '';
