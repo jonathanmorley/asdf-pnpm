@@ -12,7 +12,7 @@ FALLBACK_REGISTRY='https://registry.npmjs.org/'
 
 REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
 if command -v npm 1>/dev/null; then
-  REGISTRY=$(npm config get registry)
+  REGISTRY=$(npm config get registry --force 2>/dev/null)
 fi
 
 mkdir -p "${ASDF_DOWNLOAD_PATH}"

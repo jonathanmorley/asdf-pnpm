@@ -17,6 +17,5 @@ setup() {
 }' >package.json
 
   asdf plugin add pnpm "${PLUGIN_DIR}"
-  # This currently fails due to a corepack mismatch of the npm command used by the asdf pnpm plugin
   asdf install pnpm 10.11.0
 }
