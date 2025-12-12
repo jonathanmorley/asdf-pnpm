@@ -26,6 +26,8 @@
           pkgs.stdenvNoCC.mkDerivation {
             name = "bats-${name}-${system}";
 
+            __impure = true;
+
             src = lib.fileset.toSource {
               root = ./.;
               fileset = lib.fileset.unions [
