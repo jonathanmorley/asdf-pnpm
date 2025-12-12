@@ -85,11 +85,7 @@
               export ASDF_PNPM_PLUGIN_REPO="$out"
               export HOME=$(mktemp -d)
 
-              curl https://registry.npmjs.org/pnpm | head -c100
-              false
-
-
-              # bats $src/tests/*.bats
+              bats $src/tests/*.bats
             '';
           };
       in {
