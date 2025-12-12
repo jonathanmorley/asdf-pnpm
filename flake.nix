@@ -22,59 +22,23 @@
         system,
         ...
       }: let
-        # Source filtered to only bin/ and tests/ - hash changes only when these change
-        testSrc = lib.fileset.toSource {
-          root = ./.;
-          fileset = lib.fileset.unions [
-            ./bin
-            ./tests
-            ./flake.nix
-            ./LICENSE
-          ];
-        };
-
-        # Compute NAR hash of filtered source (cached)
-        testSrcHash = lib.removeSuffix "\n" (
-          builtins.readFile (
-            pkgs.runCommandLocal "test-src-hash" {} ''
-              ${pkgs.nix}/bin/nix --extra-experimental-features nix-command hash path --base64 ${testSrc} > $out
-            ''
-          )
-        );
-
-        # Git repo containing just the plugin for `asdf plugin-test`
-        pluginRepo =
-          pkgs.runCommandLocal "asdf-pnpm-plugin-repo" {
-            nativeBuildInputs = [pkgs.git];
-          } ''
-            mkdir -p $out
-            cp -r ${testSrc}/bin ${testSrc}/LICENSE $out/
-            chmod -R +x $out/bin/*
-            git -C $out init
-            git -C $out config user.name "Test Runner"
-            git -C $out config user.email "test@example.com"
-
-            # Patch shebangs (so asdf plugin test gets them when cloning)
-            patchShebangs $out/bin/*
-
-            git -C $out add .
-            git -C $out commit -m "Test snapshot" >/dev/null
-          '';
-
-        # Fixed-output derivation that runs bats tests with network access
         mkCheck = name: nodejs:
           pkgs.stdenvNoCC.mkDerivation {
-            # Include system in name so each architecture is treated as a separate derivation
             name = "bats-${name}-${system}";
 
-            outputHashAlgo = "sha256";
-            outputHashMode = "recursive";
-            outputHash = testSrcHash;
+            src = lib.fileset.toSource {
+              root = ./.;
+              fileset = lib.fileset.unions [
+                ./bin
+                ./tests
+                ./LICENSE
+              ];
+            };
 
+            nativeBuildInputs = [pkgs.git];
             nativeCheckInputs = [
               pkgs.asdf-vm
               pkgs.bats
-              pkgs.cacert
               pkgs.curl
               pkgs.git
               pkgs.gnutar
@@ -88,26 +52,37 @@
             dontConfigure = true;
             dontFixup = true;
             doCheck = true;
+            dontInstall = true;
 
             buildPhase = ''
-              cp -r "${pluginRepo}" plugin-repo
-              export ASDF_PNPM_PLUGIN_REPO="$PWD/plugin-repo"
+              mkdir -p $out
+
+              cp -r $src/bin $src/LICENSE $out/
+              chmod -R +x $out/bin/*
+              git -C $out init
+              git -C $out config user.name "Test Runner"
+              git -C $out config user.email "test@example.com"
+
+              # Patch shebangs (so asdf plugin test gets them when cloning)
+              patchShebangs $out/bin/*
+
+              git -C $out add .
+              git -C $out commit -m "Test snapshot" >/dev/null
             '';
+
+            SSL_CERT_FILE =
+              if builtins.getEnv "SSL_CERT_FILE" != ""
+              then builtins.getEnv "SSL_CERT_FILE"
+              else "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+
+            # Export node path for shebang patching in tests
+            NIX_NODE_PATH = "${nodejs}/bin/node";
 
             checkPhase = ''
+              export ASDF_PNPM_PLUGIN_REPO="$out"
               export HOME=$(mktemp -d)
 
-              # Set CA cert environment variable
-              export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-
-              # Export node path for shebang patching in tests
-              export NIX_NODE_PATH="${nodejs}/bin/node"
-
-              bats ${testSrc}/tests/*.bats
-            '';
-
-            installPhase = ''
-              cp -r ${testSrc} $out
+              bats $src/tests/*.bats
             '';
           };
       in {
