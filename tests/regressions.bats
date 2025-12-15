@@ -3,14 +3,19 @@ setup_file() {
   PATH="$HOME/.asdf/shims:$PATH"
 }
 
+# Patches shebang from #!/usr/bin/env node to NIX_NODE_PATH if set
+patch_shebang() {
+  local file="$1"
+  if [ -f "$file" ] && head -1 "$file" | grep -q '^#!/usr/bin/env node'; then
+    sed -i "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$file"
+  fi
+}
+
 # Wrapper that patches shebangs if NIX_NODE_PATH is set, then runs pnpm
 pnpm_wrapper() {
   if [ -n "${NIX_NODE_PATH:-}" ]; then
-    local pnpm_path
-    pnpm_path="$(asdf which pnpm)"
-    if [ -f "$pnpm_path" ] && head -1 "$pnpm_path" | grep -q '^#!/usr/bin/env node'; then
-      sed -i "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$pnpm_path"
-    fi
+    patch_shebang "$(command -v pnpm)"
+    patch_shebang "$(asdf which pnpm)"
   fi
   command pnpm "$@"
 }
@@ -38,8 +43,6 @@ pnpm_wrapper() {
   echo 'pnpm 10.12.3' >.tool-versions
 
   asdf install
-
-  cat "$(command -v pnpm)"
 
   [[ "$(pnpm_wrapper --version)" == "10.12.3" ]]
 }
