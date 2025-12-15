@@ -7,7 +7,7 @@ setup_file() {
 pnpm_wrapper() {
   if [ -n "${NIX_NODE_PATH:-}" ]; then
     local pnpm_path
-    pnpm_path="$(command -v pnpm)"
+    pnpm_path="$(asdf which pnpm)"
     if [ -f "$pnpm_path" ] && head -1 "$pnpm_path" | grep -q '^#!/usr/bin/env node'; then
       sed -i "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$pnpm_path"
     fi
