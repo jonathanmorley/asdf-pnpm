@@ -39,5 +39,7 @@ pnpm_wrapper() {
 
   asdf install
 
+  cat "$(command -v pnpm)"
+
   [[ "$(pnpm_wrapper --version)" == "10.12.3" ]]
 }
