@@ -3,6 +3,18 @@ setup_file() {
   PATH="$HOME/.asdf/shims:$PATH"
 }
 
+# Wrapper that patches shebangs if NIX_NODE_PATH is set, then runs pnpm
+pnpm_wrapper() {
+  if [ -n "${NIX_NODE_PATH:-}" ]; then
+    local pnpm_path
+    pnpm_path="$(command -v pnpm)"
+    if [ -f "$pnpm_path" ] && head -1 "$pnpm_path" | grep -q '^#!/usr/bin/env node'; then
+      sed -i "1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|" "$pnpm_path"
+    fi
+  fi
+  command pnpm "$@"
+}
+
 # https://github.com/jonathanmorley/asdf-pnpm/issues/35
 @test "corepack compatibility" {
   cd "$BATS_TEST_TMPDIR"
@@ -27,5 +39,5 @@ setup_file() {
 
   asdf install
 
-  [[ "$(pnpm --version)" == "10.12.3" ]]
+  [[ "$(pnpm_wrapper --version)" == "10.12.3" ]]
 }
