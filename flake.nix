@@ -77,13 +77,12 @@
               then builtins.getEnv "SSL_CERT_FILE"
               else "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
-            # Export node path for shebang patching in tests
-            NIX_NODE_PATH = "${nodejs}/bin/node";
-
             checkPhase = ''
               export ASDF_PNPM_PLUGIN_REPO="$out"
               export HOME=$(mktemp -d)
               export NODE_EXTRA_CA_CERTS="$SSL_CERT_FILE"
+
+              declare -fx patchShebangs isScript
 
               bats $src/tests/*.bats
             '';

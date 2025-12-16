@@ -1,16 +1,10 @@
+#!/usr/bin/env bats
+
+load helpers
+
 setup_file() {
   asdf plugin add pnpm "${ASDF_PNPM_PLUGIN_REPO}"
   PATH="$HOME/.asdf/shims:$PATH"
-}
-
-# Wrapper that patches shebangs if NIX_NODE_PATH is set, then runs pnpm
-pnpm_wrapper() {
-  if [ -n "${NIX_STORE:-}" ]; then
-    patchShebangs "$(command -v pnpm)"
-    patchShebangs "$(asdf which pnpm)"
-  fi
-
-  command pnpm "$@"
 }
 
 # https://github.com/jonathanmorley/asdf-pnpm/issues/35
@@ -36,6 +30,7 @@ pnpm_wrapper() {
   echo 'pnpm 10.12.3' >.tool-versions
 
   asdf install
+  patchAsdf
 
-  [[ "$(pnpm_wrapper --version)" == "10.12.3" ]]
+  [[ "$(pnpm --version)" == "10.12.3" ]]
 }

@@ -13,11 +13,11 @@
       programs.jsonfmt.enable = true; # json
       programs.shellcheck = {
         enable = true;
-        includes = ["bin/*" "*.bats"];
+        includes = ["bin/*" "*.bats" "*.bash"];
       };
       programs.shfmt = {
         enable = true;
-        includes = ["bin/*" "*.bats"];
+        includes = ["bin/*" "*.bats" "*.bash"];
       };
     };
   };
