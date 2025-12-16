@@ -1,15 +1,18 @@
 #!/usr/bin/env bats
 
-setup() {
+load helpers
+
+setup_file() {
   PLUGIN_DIR="${ASDF_PNPM_PLUGIN_REPO}"
   export PLUGIN_DIR
+  cache_versions
 }
 
 # Build a test command that patches shebangs if NIX_NODE_PATH is set, then runs pnpm --version
 get_test_command() {
-  if [ -n "${NIX_NODE_PATH:-}" ]; then
+  if command -v patchShebangs &>/dev/null; then
     # Patch shebangs before running pnpm
-    echo "for f in bin/pnpm.cjs bin/pnpm.js lib/bin/pnpm.js; do [ -f \"\$f\" ] && sed -i \"1s|^#!/usr/bin/env node|#!${NIX_NODE_PATH}|\" \"\$f\"; done; pnpm --version"
+    echo "patchShebangs bin; pnpm --version"
   else
     echo "pnpm --version"
   fi

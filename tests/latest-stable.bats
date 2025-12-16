@@ -1,8 +1,11 @@
 #!/usr/bin/env bats
 
-setup() {
+load helpers
+
+setup_file() {
   PLUGIN_DIR="${ASDF_PNPM_PLUGIN_REPO}"
   export PLUGIN_DIR
+  cache_versions
 }
 
 @test "latest-stable script exists and is executable" {
@@ -62,7 +65,7 @@ setup() {
 
 @test "latest-stable returns latest within major version" {
   # Get all 8.x versions and verify latest-stable returns the highest
-  all_versions=$("$PLUGIN_DIR/bin/list-all" | tr ' ' '\n' | grep -E '^8\.[0-9]+\.[0-9]+$')
+  all_versions=$(get_cached_versions | tr ' ' '\n' | grep -E '^8\.[0-9]+\.[0-9]+$')
   expected=$(echo "$all_versions" | tail -1)
 
   run "$PLUGIN_DIR/bin/latest-stable" 8

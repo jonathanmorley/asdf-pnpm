@@ -42,9 +42,9 @@ asdf plugin-add pnpm
 Use the following commands to run tests for all supported architectures (`--all-systems` does not appear to work correctly for this):
 
 ```
-nix flake check --system aarch64-darwin
-nix flake check --system aarch64-linux
-nix flake check --system x86_64-linux
+nix flake check --system aarch64-darwin --impure
+nix flake check --system aarch64-linux --impure
+nix flake check --system x86_64-linux --impure
 ```
 
 [1]: https://asdf-vm.com/

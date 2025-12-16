@@ -20,10 +20,25 @@ mkdir -p "${ASDF_DOWNLOAD_PATH}"
 download_and_extract() {
   local reg="$1"
   local tarball_url="${reg%/}/pnpm/-/pnpm-${ASDF_INSTALL_VERSION}.tgz"
+  local tmpfile
+  tmpfile=$(mktemp)
+  local http_code
 
   echo "Downloading pnpm v${ASDF_INSTALL_VERSION} from ${tarball_url}"
-  curl --silent --fail --location "${tarball_url}" |
-    tar xzf - --strip-components=1 --no-same-owner -C "${ASDF_DOWNLOAD_PATH}"
+  http_code=$(curl --silent --write-out "%{http_code}" --location "${tarball_url}" -o "$tmpfile") || http_code="000"
+
+  if [[ $http_code == "000" ]]; then
+    echo >&2 "⛔ Failed to connect to ${tarball_url} (network/TLS error)"
+    rm -f "$tmpfile"
+    return 1
+  elif [[ $http_code != "200" ]]; then
+    echo >&2 "⛔ Failed to download from ${tarball_url} (HTTP ${http_code})"
+    rm -f "$tmpfile"
+    return 1
+  fi
+
+  tar xzf "$tmpfile" --strip-components=1 --no-same-owner -C "${ASDF_DOWNLOAD_PATH}"
+  rm -f "$tmpfile"
 }
 
 # Try configured registry first, fall back to default if different and first attempt fails
