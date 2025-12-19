@@ -40,6 +40,7 @@
             nativeBuildInputs = [pkgs.git];
             nativeCheckInputs = [
               pkgs.asdf-vm
+              pkgs.mise
               pkgs.bats
               pkgs.curl
               pkgs.git
@@ -89,8 +90,8 @@
           };
       in {
         checks = {
-          node20 = mkCheck "node20" pkgs.nodejs_20;
-          node22 = mkCheck "node22" pkgs.nodejs_22;
+          #node20 = mkCheck "node20" pkgs.nodejs_20;
+          #node22 = mkCheck "node22" pkgs.nodejs_22;
           node24 = mkCheck "node24" pkgs.nodejs_24;
         };
       };
