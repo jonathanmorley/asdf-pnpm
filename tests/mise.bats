@@ -20,8 +20,8 @@ test_pnpm_version() {
     return 1
   }
 
-  mise plugins link asdf-pnpm "${ASDF_PNPM_PLUGIN_REPO}" --force
-  run mise install "asdf-pnpm@${version}" --verbose
+  mise plugins link pnpm "${ASDF_PNPM_PLUGIN_REPO}" --force
+  run mise install "pnpm@${version}" --verbose
   [ "$status" -eq 0 ]
   [[ $output =~ Downloading\ pnpm\ v${version}\ from\ https://registry.npmjs.org/pnpm/-/pnpm-${version}.tgz ]]
 }
