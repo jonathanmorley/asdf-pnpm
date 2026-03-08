@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: DeterminateSystems/flake-checker-action@3164002371bc90729c68af0e24d5aacf20d7c9f6 # v12
-      - uses: DeterminateSystems/determinate-nix-action@89ab342bd48ff7318caf8d39d6a330c7b1df8f2f # v3.15.2
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4 # v3.17.0
         with:
           extra-conf: extra-experimental-features = ca-derivations impure-derivations
       - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
