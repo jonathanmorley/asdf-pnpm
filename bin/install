@@ -24,6 +24,7 @@ BINARIES=('pnpm' 'pnpx')
 for bin in "${BINARIES[@]}"; do
   BIN_PATH=""
   BINARY_PATHS=(
+    "${ASDF_INSTALL_PATH}/bin/${bin}.mjs"    #v12 (Rust rewrite)
     "${ASDF_INSTALL_PATH}/bin/${bin}.cjs"    #v6
     "${ASDF_INSTALL_PATH}/bin/${bin}.js"     #v2 - v5
     "${ASDF_INSTALL_PATH}/lib/bin/${bin}.js" #v1
