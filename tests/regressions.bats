@@ -27,12 +27,12 @@ setup_file() {
 @test "pnpm 12 installs correctly (mjs binaries)" {
   cd "$BATS_TEST_TMPDIR"
 
-  echo '12.0.0-rc.11' >.tool-versions
+  echo '12.2.1' >.tool-versions
 
   asdf install
   patchAsdf
 
-  [[ "$(pnpm --version)" == "12.0.0-rc.11" ]]
+  [[ "$(pnpm --version)" == "12.2.1" ]]
 }
 
 # https://github.com/jonathanmorley/asdf-pnpm/issues/37
