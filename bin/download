@@ -41,6 +41,25 @@ download_and_extract() {
   rm -f "$tmpfile"
 }
 
+# `npm pack` fetches the tarball with npm's own auth/CA/proxy handling, so it
+# works against registries that reject anonymous requests (HTTP 401).
+download_and_extract_npm() {
+  local tmpdir tarball
+  tmpdir=$(mktemp -d)
+  echo "Downloading pnpm v${ASDF_INSTALL_VERSION} via npm pack (registry ${REGISTRY})"
+  if ! tarball=$(npm pack "pnpm@${ASDF_INSTALL_VERSION}" --pack-destination "$tmpdir" --silent 2>&1); then
+    echo >&2 "⛔ npm pack failed: $(echo "$tarball" | head -2)"
+    rm -rf "$tmpdir"
+    return 1
+  fi
+  tar xzf "${tmpdir}/$(echo "$tarball" | tail -1)" --strip-components=1 --no-same-owner -C "${ASDF_DOWNLOAD_PATH}"
+  rm -rf "$tmpdir"
+}
+
+if command -v npm 1>/dev/null && download_and_extract_npm; then
+  exit 0
+fi
+
 # Try configured registry first, fall back to default if different and first attempt fails
 if ! download_and_extract "$REGISTRY" 2>/dev/null; then
   if [[ ${REGISTRY%/} != "${FALLBACK_REGISTRY%/}" ]]; then

@@ -16,6 +16,18 @@ if command -v npm 1>/dev/null; then
   REGISTRY=$(npm config get registry --force 2>/dev/null)
 fi
 
+# Ask npm itself: it applies ~/.npmrc / project .npmrc auth (_authToken, ${ENV}
+# placeholders), custom CAs and proxies — which a bare curl cannot. This is what
+# makes authenticated private registries (CodeArtifact, Artifactory, ...) work.
+fetch_versions_npm() {
+  local response
+  if ! response=$(npm view pnpm versions --json 2>&1); then
+    echo >&2 "Failed to fetch versions via npm (registry ${REGISTRY}): $(echo "$response" | head -2)"
+    return 1
+  fi
+  echo "$response" | tr -d '[]", ' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | sort_versions | xargs
+}
+
 fetch_versions() {
   local reg="$1"
   local response
@@ -36,6 +48,9 @@ fetch_versions() {
 }
 
 # Try configured registry first, fall back to default if different and first attempt fails
+if command -v npm 1>/dev/null && fetch_versions_npm; then
+  exit 0
+fi
 if [[ ${REGISTRY%/} == "${FALLBACK_REGISTRY%/}" ]]; then
   fetch_versions "$REGISTRY"
 else

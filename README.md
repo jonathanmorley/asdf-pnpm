@@ -37,6 +37,16 @@ or for asdf \<0.16.0:
 asdf plugin-add pnpm
 ```
 
+## Registries
+
+Versions and tarballs come from the registry npm is configured with
+(`npm config get registry`). When `npm` is on `PATH`, the plugin fetches through
+it (`npm view` / `npm pack`), so `.npmrc` authentication (`_authToken`,
+including `${ENV_VAR}` placeholders), custom CAs and proxies apply — private
+registries that reject anonymous requests (Artifactory, AWS CodeArtifact, …)
+work. Without `npm`, or if npm fails, the plugin falls back to `curl` against
+the configured registry and then `https://registry.npmjs.org/`.
+
 ## Testing
 
 Use the following commands to run tests for all supported architectures (`--all-systems` does not appear to work correctly for this):
