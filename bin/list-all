@@ -11,9 +11,10 @@ sort_versions() {
 
 FALLBACK_REGISTRY='https://registry.npmjs.org/'
 
-REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
-if command -v npm 1>/dev/null; then
-  REGISTRY=$(npm config get registry --force 2>/dev/null)
+if r=$( npm config get registry --force 1>/dev/null 2>&1 ) ; then
+  REGISTRY="$r"
+else
+  REGISTRY="${NPM_CONFIG_REGISTRY:-$FALLBACK_REGISTRY/}"
 fi
 
 fetch_versions() {
